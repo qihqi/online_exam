@@ -10,42 +10,61 @@
   <body>
         <h2> Hello XYZ welcome to blah </h2>
         <h3><a href=''>Click here to download the exam as pdf </a></h3>
+        <p id="progress">Upload Progress: <span id="progress_value"></span> </p>
+
+
         <div class="panel panel-default">
           <div class="panel-heading">
             <h3 class="panel-title">Problem 1</h3>
           </div>
           <div class="panel-body">
             <p> Prove that \( x^2 - y^2 = (x - y)(x + y) \). </p>
-                <form>
+                <form id="the_form">
                   <div class="input-group">
                      <label for="ans">Answer:</label>
-                     <input type="file" class="form-control" id="ans" placeholder="upload file" />
+                     <input name="prob_id" value="1" type="hidden" />
+                     <input name="upload" type="file" class="form-control" id="ans" placeholder="upload file" />
                   </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-          </div>
-
-          
-        </div>
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Problem 2</h3>
-          </div>
-          <div class="panel-body">
-            <p> Prove that \( x^2 - y^2 = (x - y)(x + y) \). </p>
-                <form>
-                  <div class="input-group">
-                     <label for="ans">Answer:</label>
-                     <input type="file" class="form-control" id="ans" placeholder="upload file" />
-                  </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
+                  <button class="btn btn-primary" id="submit_button">Submit</button>
                 </form>
           </div>
         </div>
+        <script src="https://code.jquery.com/jquery-3.5.0.slim.min.js"></script>
   <!-- Latest compiled and minified JavaScript -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<script>
+
+function uploadForm(uid) {
+    let form = document.getElementById(uid);
+    let formData = new FormData(form);
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload_solution', true);
+    console.log('here');
+    xhr.upload.addEventListener('progress', function(e) {
+        var perc = (e.loaded / e.total ) * 100;
+        document.getElementById('progress_value').innerHTML = perc + '%';
+    });
+
+    xhr.addEventListener('load', function(e) {
+        console.log(xhr.status);
+        alert('success');
+    });
+
+    xhr.send(formData);
+}
+
+$(document).ready( function() {
+    console.log('doc.ready');
+    $('#submit_button').click(function() {
+        console.log('clicked');
+        uploadForm('the_form');
+        return false;
+    });
+});
+</script>
+
   </body>
 </html>
