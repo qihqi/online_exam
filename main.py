@@ -80,6 +80,8 @@ def all_solutions():
             ).render(submissions=submissions)
 
 
+application = bottle.default_app()
+
 if __name__ == '__main__':
     models.Base.metadata.create_all(engine)
     bottle.run(host='localhost', port=8080)
