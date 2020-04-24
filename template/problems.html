@@ -8,9 +8,11 @@
   </head>
 
   <body>
-        <h2> Hello XYZ welcome to blah </h2>
+        <h2> Hello {{ user.nickname }} welcome to QMO</h2>
+        {% if msg %}
+        <h3> {{ msg }} </h3>
+        {% endif %}
         <h3><a href=''>Click here to download the exam as pdf </a></h3>
-
 
         {% for prob in problems %}
         <div class="panel panel-default">
@@ -19,9 +21,9 @@
           </div>
           <div class="panel-body">
               <p> {{ prob }} </p>
-                <form id="the_form" action="/upload_solution" method="post">
+                <form id="the_form" action="/upload_solution/{{user.access_uuid}}" method="post">
                   <div class="input-group">
-                     <label for="ans">Answer:</label>
+                     <label for="ans">Answer Link:</label>
                      <input name="prob_id" value="{{loop.index}}" type="hidden" />
                      <input name="user_id" value="{{user.uid}}" type="hidden" />
                      <input name="link" type="text" class="form-control" />
