@@ -8,11 +8,12 @@ from bottle import request, response
 import sqlalchemy
 
 import models
+import config
 
 
 FILE_SAVE_DIR = '/tmp'
 
-engine = sqlalchemy.create_engine('mysql://root:no jodas@localhost/online_exam')
+engine = sqlalchemy.create_engine(config.CONN_STRING)
 Session = sqlalchemy.orm.sessionmaker(bind=engine)
 jinja_env = Environment(loader=FileSystemLoader('template'))
 
