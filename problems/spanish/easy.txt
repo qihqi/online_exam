@@ -1,0 +1,11 @@
+demostrar que \( x^2 - y^2 = (x - y)(x + y) \).
+This is a multiple statement. $ x^2$.
+
+demostrar que \( x^2 - y^2 = (x - y)(x + y) \).
+This is a multiple statement. $ x^2$.
+
+demostrar que \( x^2 - y^2 = (x - y)(x + y) \).
+This is a multiple statement. $ x^2$.
+
+demostrar que \( x^2 - y^2 = (x - y)(x + y) \).
+This is a multiple statement. $ x^2$.

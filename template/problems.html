@@ -8,7 +8,21 @@
   </head>
 
   <body>
+        <form action="" method="get">
+            <label for="lang">Choose language:</label>
+            <select name="lang">
+                <option value="english">English</option>
+                <option value="spanish">Espanol</option>
+            </select>
+            <label for="lang">Choose level:</label>
+            <select name="hard_level">
+                <option value="easy">Easy</option>
+                <option value="hard">Hard</option>
+            </select>
+            <input type="submit">Submit</input>
+        </form>
         <h2> Hello {{ user.nickname }} welcome to QMO</h2>
+        <h2> Lang = {{ lang }}; level = {{ hard_level }} </h2>
         {% if msg %}
         <h3> {{ msg }} </h3>
         {% endif %}

@@ -18,6 +18,13 @@ Session = sqlalchemy.orm.sessionmaker(bind=engine)
 jinja_env = Environment(loader=FileSystemLoader('template'))
 
 
+def get_problems(hard_level, language):
+    root_dir = config.PROBLEM_DIR
+    fpath = os.path.join(root_dir, language, hard_level + '.txt')
+    with open(fpath) as f:
+        return f.read().split('\n\n')
+
+
 @contextmanager
 def session_scope():
     """Provide a transactional scope around a series of operations."""
@@ -44,16 +51,22 @@ def index():
 @bottle.get('/user/<uid>/prob')
 def get_prob_page(uid):
     msg = request.query.get('msg', '')
+    hard_level = request.query.get('hard_level', 'easy')
+    language = request.query.get('lang', 'english')
+    if hard_level not in ('easy', 'hard'):
+        # error
+        pass
+    if language not in ('english', 'spanish'):
+        # error
+        pass
     with session_scope() as session:
         user = session.query(models.User).filter_by(access_uuid=uid).first()
         if user is None:
             return 'Access Id not found'
-        problems = [
-            """Prove that \( x^2 - y^2 = (x - y)(x + y) \).""",
-            """Prove that \( x^2 - y^2 = (x - y)(x + y) \)."""
-        ]
+        problems = get_problems(hard_level, language)
         return jinja_env.get_template('problems.html').render(
-                user=user, problems=problems, msg=msg)
+                user=user, problems=problems, msg=msg, 
+                lang=lang, hard_level=hard_level)
 
 
 @bottle.post('/upload_solution/<uid>')

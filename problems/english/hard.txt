@@ -1,0 +1,8 @@
+Prove that \( x^2 - y^2 = (x - y)(x + y) \).
+This is a harder problem statement. $ x^2$.
+
+Prove that \( x^2 - y^2 = (x - y)(x + y) \)
+
+Prove that \( x^2 - y^2 = (x - y)(x + y) \)
+
+Prove that \( x^2 - y^2 = (x - y)(x + y) \)
