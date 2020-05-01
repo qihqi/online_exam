@@ -66,7 +66,7 @@ def get_prob_page(uid):
         problems = get_problems(hard_level, language)
         return jinja_env.get_template('problems.html').render(
                 user=user, problems=problems, msg=msg, 
-                lang=lang, hard_level=hard_level)
+                lang=language, hard_level=hard_level)
 
 
 @bottle.post('/upload_solution/<uid>')
@@ -74,6 +74,13 @@ def recv_solution(uid):
     prob_id = request.forms.get('prob_id')
     link = request.forms.get('link')
     user_id = request.forms.get('user_id')
+    upload = request.files.get('upload', None)
+    if upload is not None:
+        if link:
+            bottle.redirect(
+                '/user/{}/prob?msg=cannot+upload+file+and+link+at+the+same+time'.format(uid))
+        upload.save(os.path.join(config.FILE_SAVE_DIR, upload.filename))
+        link = os.path.join(config.STATIC_FILE_URL, upload.filename)
     redirect_url = '/user/{}/prob?msg=success'.format(uid)
     sub = models.Submission()
     sub.link = link

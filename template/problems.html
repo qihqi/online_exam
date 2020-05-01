@@ -37,10 +37,16 @@
               <p> {{ prob }} </p>
                 <form id="the_form" action="/upload_solution/{{user.access_uuid}}" method="post">
                   <div class="input-group">
-                     <label for="ans">Answer Link:</label>
                      <input name="prob_id" value="{{loop.index}}" type="hidden" />
                      <input name="user_id" value="{{user.uid}}" type="hidden" />
-                     <input name="link" type="text" class="form-control" />
+                     <p>
+                     <label for="ans">Answer Link:</label>
+                     <input name="link" type="text" class="form-control" placeholder="Link for solution" />
+                     </p>
+                     <p>
+                     <label for="ans">Answer File:</label>
+                     <input type="file" class="form-control" id="ans" placeholder="upload file" />
+                     </p>
                   </div>
                   <button class="btn btn-primary" id="submit_button">Submit</button>
                 </form>
