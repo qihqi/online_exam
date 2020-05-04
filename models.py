@@ -23,4 +23,5 @@ class Submission(Base):
     prob_id = Column(Integer)
     user_id = Column(Integer,  ForeignKey(User.uid))
     link = Column(Text)
+    language = Column(Text)
 

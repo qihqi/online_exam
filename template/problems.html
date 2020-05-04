@@ -11,8 +11,9 @@
         <form action="" method="get">
             <label for="lang">Choose language:</label>
             <select name="lang">
-                <option value="english">English</option>
-                <option value="spanish">Espanol</option>
+                {% for l in languages %}
+                <option value="{{l}}"  {% if l == lang %} selected {%endif%}> {{l}} </option>
+                {% endfor %}
             </select>
             <label for="lang">Choose level:</label>
             <select name="hard_level">
@@ -21,6 +22,7 @@
             </select>
             <input type="submit">Submit</input>
         </form>
+
         <h2> Hello {{ user.nickname }} welcome to QMO</h2>
         <h2> Lang = {{ lang }}; level = {{ hard_level }} </h2>
         {% if msg %}
@@ -35,17 +37,25 @@
           </div>
           <div class="panel-body">
               <p> {{ prob }} </p>
-                <form id="the_form" action="/upload_solution/{{user.access_uuid}}" method="post">
+                <form id="the_form" action="/upload_solution/{{user.access_uuid}}" method="post" enctype="multipart/form-data">
                   <div class="input-group">
                      <input name="prob_id" value="{{loop.index}}" type="hidden" />
                      <input name="user_id" value="{{user.uid}}" type="hidden" />
+                     <p>
+                    <label for="lang">Answer language:</label>
+                    <select name="language">
+                        {% for l in languages %}
+                        <option value="{{l}}" {% if l == lang %} selected {%endif%}> {{l}} </option>
+                        {% endfor %}
+                    </select>
+                     </p>
                      <p>
                      <label for="ans">Answer Link:</label>
                      <input name="link" type="text" class="form-control" placeholder="Link for solution" />
                      </p>
                      <p>
                      <label for="ans">Answer File:</label>
-                     <input type="file" class="form-control" id="ans" placeholder="upload file" />
+                     <input name="upload" type="file" class="form-control" id="ans" placeholder="upload file" />
                      </p>
                   </div>
                   <button class="btn btn-primary" id="submit_button">Submit</button>

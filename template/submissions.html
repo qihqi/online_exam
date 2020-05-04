@@ -22,7 +22,7 @@
                 <tr>
                     <td scope="col">{{ user.email }}</td>
                     <td scope="col">{{ sub.prob_id }}</td>
-                    <td scope="col">{{ sub.link }}</td>
+                    <td scope="col"><a href="{{ sub.link }}">{{ sub.link }}</a></td>
                 </tr>
                 {% endfor %}
             </tbody>

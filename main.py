@@ -17,6 +17,31 @@ engine = sqlalchemy.create_engine(config.CONN_STRING)
 Session = sqlalchemy.orm.sessionmaker(bind=engine)
 jinja_env = Environment(loader=FileSystemLoader('template'))
 
+ALL_LANG = sorted("""
+english
+french
+spanish
+german
+uzbek
+italian
+russian
+chinese
+japanese
+albanian
+arabic
+hungarian
+ukranian
+portuguese
+dutch-flemish
+slovenian
+croatian
+latvian
+turkish
+hindi
+thai
+romanian
+""".strip().split('\n'))
+
 
 def get_problems(hard_level, language):
     root_dir = config.PROBLEM_DIR
@@ -39,6 +64,7 @@ def session_scope():
         session.close()
 
 
+@bottle.get('/static/<path:path>')
 def static(path):
     return bottle.static_file(path, root='static')
 
@@ -66,7 +92,7 @@ def get_prob_page(uid):
         problems = get_problems(hard_level, language)
         return jinja_env.get_template('problems.html').render(
                 user=user, problems=problems, msg=msg, 
-                lang=language, hard_level=hard_level)
+                lang=language, hard_level=hard_level, languages=ALL_LANG)
 
 
 @bottle.post('/upload_solution/<uid>')
@@ -75,17 +101,21 @@ def recv_solution(uid):
     link = request.forms.get('link')
     user_id = request.forms.get('user_id')
     upload = request.files.get('upload', None)
+    language = request.files.get('language')
+    print(upload, request.files.keys())
     if upload is not None:
         if link:
             bottle.redirect(
                 '/user/{}/prob?msg=cannot+upload+file+and+link+at+the+same+time'.format(uid))
         upload.save(os.path.join(config.FILE_SAVE_DIR, upload.filename))
         link = os.path.join(config.STATIC_FILE_URL, upload.filename)
+        print(link)
     redirect_url = '/user/{}/prob?msg=success'.format(uid)
     sub = models.Submission()
     sub.link = link
     sub.user_id = user_id
     sub.prob_id = prob_id
+    sub.language = language
     with session_scope() as session:
         session.add(sub)
     return bottle.redirect(redirect_url)
@@ -96,7 +126,6 @@ def all_solutions():
     with session_scope() as session:
         submissions = session.query(models.Submission, models.User).filter(
                 models.Submission.user_id == models.User.uid)
-        print(list(submissions))
         return jinja_env.get_template('submissions.html'
             ).render(submissions=submissions)
 
