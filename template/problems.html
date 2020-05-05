@@ -12,7 +12,7 @@
             <label for="lang">Choose language:</label>
             <select name="lang">
                 {% for l in languages %}
-                <option value="{{l}}"  {% if l == lang %} selected {%endif%}> {{l}} </option>
+                <option value="{{l}}"  {% if l == lang %} selected {%endif%}> {{ l[0]|upper}}{{l[1:]}} </option>
                 {% endfor %}
             </select>
             <label for="lang">Choose level:</label>
@@ -44,8 +44,8 @@
                      <p>
                     <label for="lang">Answer language:</label>
                     <select name="language">
-                        {% for l in languages %}
-                        <option value="{{l}}" {% if l == lang %} selected {%endif%}> {{l}} </option>
+                        {% for l in answer_lang %}
+                        <option value="{{l}}" {% if l == lang %} selected {%endif%}>{{ l[0]|upper}}{{l[1:]}}</option>
                         {% endfor %}
                     </select>
                      </p>

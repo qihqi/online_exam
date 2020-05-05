@@ -24,4 +24,5 @@ class Submission(Base):
     user_id = Column(Integer,  ForeignKey(User.uid))
     link = Column(Text)
     language = Column(Text)
+    timestamp = Column(DateTime)
 

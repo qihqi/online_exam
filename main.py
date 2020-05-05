@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+
+
 from contextlib import contextmanager
+import datetime
 import os
+import uuid
 
 import jinja2
 from jinja2 import Environment, FileSystemLoader
@@ -40,6 +45,19 @@ turkish
 hindi
 thai
 romanian
+""".strip().split('\n'))
+
+ANSWER_LANG = sorted("""
+english
+spanish
+french
+arabic
+russian
+german
+italian
+thai
+hungarian
+estonian
 """.strip().split('\n'))
 
 
@@ -92,23 +110,29 @@ def get_prob_page(uid):
         problems = get_problems(hard_level, language)
         return jinja_env.get_template('problems.html').render(
                 user=user, problems=problems, msg=msg, 
-                lang=language, hard_level=hard_level, languages=ALL_LANG)
+                lang=language, hard_level=hard_level, 
+                languages=ALL_LANG, answer_lang=ANSWER_LANG)
 
 
 @bottle.post('/upload_solution/<uid>')
 def recv_solution(uid):
-    prob_id = request.forms.get('prob_id')
+    print(request.forms.keys())
+    print(request.query.keys())
+    prob_id = int(request.forms.get('prob_id'))
     link = request.forms.get('link')
-    user_id = request.forms.get('user_id')
+    user_id = int(request.forms.get('user_id'))
     upload = request.files.get('upload', None)
-    language = request.files.get('language')
-    print(upload, request.files.keys())
+    language = request.forms.get('language')
+    timestamp = datetime.datetime.utcnow()
     if upload is not None:
         if link:
             bottle.redirect(
-                '/user/{}/prob?msg=cannot+upload+file+and+link+at+the+same+time'.format(uid))
-        upload.save(os.path.join(config.FILE_SAVE_DIR, upload.filename))
-        link = os.path.join(config.STATIC_FILE_URL, upload.filename)
+                ('/user/{}/prob?msg=cannot+'
+                'upload+file+and+link+at+the+same+time').format(uid))
+        orig_name, ext = os.path.splitext(upload.filename)
+        new_filename = uuid.uuid4().hex + ext
+        upload.save(os.path.join(config.FILE_SAVE_DIR, new_filename))
+        link = os.path.join(config.STATIC_FILE_URL, new_filename)
         print(link)
     redirect_url = '/user/{}/prob?msg=success'.format(uid)
     sub = models.Submission()
@@ -116,6 +140,7 @@ def recv_solution(uid):
     sub.user_id = user_id
     sub.prob_id = prob_id
     sub.language = language
+    sub.timestamp = timestamp
     with session_scope() as session:
         session.add(sub)
     return bottle.redirect(redirect_url)
