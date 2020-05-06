@@ -14,6 +14,7 @@ class User(Base):
     access_uuid = Column(String(20))
     preferred_lang = Column(String(20))
     submissions = relationship('Submission', backref=backref('user'))
+    start_timestamp = Column(DateTime)
 
 
 class Submission(Base):

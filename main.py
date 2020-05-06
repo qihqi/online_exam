@@ -91,6 +91,15 @@ def static(path):
 def index():
     return bottle.static_file('mock.html', root='static')
 
+@bottle.get('/user/<uid>')
+def get_landing_page(uid):
+    with session_scope() as session:
+        user = session.query(models.User).filter_by(access_uuid=uid).first()
+        if user is None:
+            return 'Access Id not found'
+    return jinja_env.get_template('landing.html').render(
+            uid=uid)
+
 
 @bottle.get('/user/<uid>/prob')
 def get_prob_page(uid):
@@ -107,6 +116,12 @@ def get_prob_page(uid):
         user = session.query(models.User).filter_by(access_uuid=uid).first()
         if user is None:
             return 'Access Id not found'
+
+        if user.start_timestamp is None:
+            session.query(models.User).filter_by(access_uuid=uid).update(
+                    {'start_timestamp': datetime.datetime.utcnow()})
+
+        print(user.start_timestamp)
         problems = get_problems(hard_level, language)
         return jinja_env.get_template('problems.html').render(
                 user=user, problems=problems, msg=msg, 

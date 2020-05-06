@@ -9,22 +9,16 @@
 
   <body>
         <form action="" method="get">
-            <label for="lang">Choose language:</label>
+            <label for="lang">Change language:</label>
             <select name="lang">
                 {% for l in languages %}
                 <option value="{{l}}"  {% if l == lang %} selected {%endif%}> {{ l[0]|upper}}{{l[1:]}} </option>
                 {% endfor %}
             </select>
-            <label for="lang">Choose level:</label>
-            <select name="hard_level">
-                <option value="easy">Easy</option>
-                <option value="hard">Hard</option>
-            </select>
             <input type="submit">Submit</input>
         </form>
 
         <h2> Hello {{ user.nickname }} welcome to QMO</h2>
-        <h2> Lang = {{ lang }}; level = {{ hard_level }} </h2>
         {% if msg %}
         <h3> {{ msg }} </h3>
         {% endif %}
@@ -42,20 +36,16 @@
                      <input name="prob_id" value="{{loop.index}}" type="hidden" />
                      <input name="user_id" value="{{user.uid}}" type="hidden" />
                      <p>
-                    <label for="lang">Answer language:</label>
-                    <select name="language">
-                        {% for l in answer_lang %}
-                        <option value="{{l}}" {% if l == lang %} selected {%endif%}>{{ l[0]|upper}}{{l[1:]}}</option>
-                        {% endfor %}
-                    </select>
+                         <label for="lang">Answer language:</label>
+                         <select name="language">
+                             {% for l in answer_lang %}
+                             <option value="{{l}}" {% if l == lang %} selected {%endif%}>{{ l[0]|upper}}{{l[1:]}}</option>
+                             {% endfor %}
+                         </select>
                      </p>
                      <p>
-                     <label for="ans">Answer Link:</label>
-                     <input name="link" type="text" class="form-control" placeholder="Link for solution" />
-                     </p>
-                     <p>
-                     <label for="ans">Answer File:</label>
-                     <input name="upload" type="file" class="form-control" id="ans" placeholder="upload file" />
+                         <label for="ans">Answer File:</label>
+                         <input name="upload" type="file" class="form-control" id="ans" placeholder="upload file" />
                      </p>
                   </div>
                   <button class="btn btn-primary" id="submit_button">Submit</button>
