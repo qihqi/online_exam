@@ -118,15 +118,19 @@ def get_prob_page(uid):
             return 'Access Id not found'
 
         if user.start_timestamp is None:
+            start_time = datetime.datetime.utcnow()
             session.query(models.User).filter_by(access_uuid=uid).update(
                     {'start_timestamp': datetime.datetime.utcnow()})
+        else:
+            start_time = user.start_timestamp
 
-        print(user.start_timestamp)
+        end_time = start_time + datetime.timedelta(hours=4)
         problems = get_problems(hard_level, language)
         return jinja_env.get_template('problems.html').render(
                 user=user, problems=problems, msg=msg, 
                 lang=language, hard_level=hard_level, 
-                languages=ALL_LANG, answer_lang=ANSWER_LANG)
+                languages=ALL_LANG, answer_lang=ANSWER_LANG,
+                end_time=end_time)
 
 
 @bottle.post('/upload_solution/<uid>')

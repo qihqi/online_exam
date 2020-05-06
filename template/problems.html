@@ -23,6 +23,7 @@
         <h3> {{ msg }} </h3>
         {% endif %}
         <h3><a href=''>Click here to download the exam as pdf </a></h3>
+        <h3> Times remain: <span id="time"></span>
 
         {% for prob in problems %}
         <div class="panel panel-default">
@@ -59,6 +60,34 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+    var end_time = {{ end_time.timestamp() }} * 1000;
+    // Update the count down every 1 second
+    var x = setInterval(function() {
+
+      // Get today's date and time
+      var now = new Date();
+      now = (now.getTime() + now.getTimezoneOffset() * 60 * 1000);
+
+      // Find the distance between now and the count down date
+      var distance = end_time - now;
+
+      // Time calculations for days, hours, minutes and seconds
+      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      // Display the result in the element with id="demo"
+      document.getElementById("time").innerHTML = hours + "h "
+      + minutes + "m " + seconds + "s ";
+
+      // If the count down is finished, write some text
+      if (distance < 0) {
+        clearInterval(x);
+        document.getElementById("demo").innerHTML = "Finished!!";
+      }
+    }, 1000);
+</script>
 
   </body>
 </html>
