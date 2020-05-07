@@ -21,7 +21,13 @@
 
         <h2> {{i18n.text(43, lang) }}</h2>
 
-        <h3><a href=''>Click here to download the exam as pdf </a></h3>
+        <h3>Exam links:</h3>
+        {% for (lang, ln) in exam_links.items() %}
+        <p>
+           <a href="{{ln}}">{{i18n.lang_name(lang)}}</a>
+        </p>
+        {% endfor %}
+
         <h3> Times remain: <span id="time"></span>
 
 
@@ -32,9 +38,11 @@
                   <h3 class="panel-title">{{label}}</h3>
               </div>
               <div class="panel-body">
+                  {#
                   {% for prob in probs %}
                   <p>{{prob}}</p>
                   {% endfor %}
+                  #}
                   <form onSubmit="return checkform('ans{{loop.index}}');" id="the_form" action="/upload_solution/{{user.access_uuid}}" method="post" enctype="multipart/form-data">
                       <div class="input-group">
                          <input name="prob_id" value="{{loop.index}}" type="hidden" />
@@ -112,7 +120,7 @@
             let size_b = fi.files.item(0).size;
             console.log('size is ', size_b);
             if (size_b > 3 * 1024 * 1024) {
-                alert("File too big, please upload < 3MB");
+                alert("{{i18n.text(69, lang)}}");
                 return false;
             }
             return true;

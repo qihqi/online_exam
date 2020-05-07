@@ -16,7 +16,7 @@ import sqlalchemy
 import models
 import config
 
-
+TESTONLY = True
 FILE_SAVE_DIR = '/tmp'
 
 engine = sqlalchemy.create_engine(config.CONN_STRING)
@@ -36,6 +36,18 @@ Thai
 Hungarian
 Estonian
 """.strip().split('\n'))
+
+question_links = {
+        'de_DE': 'https://drive.google.com/file/d/1fuDY49lV_2ylVZTQqB2-OOZ8mDiWceU0/view?usp=sharing',
+        'en': 'https://drive.google.com/file/d/1Z1pabuOsFnIidUbfnPF3VhA5SOfzDvOk/view?usp=sharing',
+        'es_ES': 'https://drive.google.com/file/d/1V3mRHr7VMiXYtsnHEiZ88m6UxgWeAPd8/view?usp=sharing',
+        'fr_FR': 'https://drive.google.com/file/d/1o30XQJf89stbcWtfHGSWaFxsmOBCxJ2c/view?usp=sharing',
+        'uk': 'https://drive.google.com/file/d/1FreQgETTGxP1Y3ndKSHxM0QshcK3cebo/view?usp=sharing',
+        'fa': 'https://drive.google.com/file/d/1SFcfQx_6hHr47NMtmzGHccuJGmOR7TRy/view?usp=sharing',
+        'ru': 'https://drive.google.com/file/d/17hIoFGcoJ-JzL_VipGQeK6clYCVgF1sZ/view?usp=sharing',
+        'th': 'https://drive.google.com/file/d/1mQVsbl6vymaTdI_Cybd-Kg1-HT69m-NZ/view?usp=sharing',
+        'uk': 'https://drive.google.com/file/d/1BPHdBP5H3hQFaxDwPVq2M6uMYHEuxkvf/view?usp=sharing',
+        }
 
 
 
@@ -70,7 +82,8 @@ def get_problems(language):
     ans = []
     for i, j in zip(prob_indexes[:-1], prob_indexes[1:]):
         label = i18n.text(i, language)
-        probs = [ i18n.text(x, language) for x in range(i + 1, j) ]
+        # probs = [ i18n.text(x, language) for x in range(i + 1, j) ]
+        probs = [ ]
         ans.append((label, probs))
     return ans
 
@@ -113,25 +126,34 @@ def get_prob_page(uid):
     msg = request.query.get('msg', '')
     hard_level = request.query.get('hard_level', 'easy')
     language = request.query.get('lang', 'en')
+
+    if TESTONLY:
+        passcode = request.query.get('testonly', None)
+        if passcode != 'soy un arrecho':
+            return 'Exam not started yet'
+
     with session_scope() as session:
         user = session.query(models.User).filter_by(access_uuid=uid).first()
         if user is None:
             return 'Access Id not found'
 
-        if user.start_timestamp is None:
+        if TESTONLY:
             start_time = datetime.datetime.utcnow()
-            session.query(models.User).filter_by(access_uuid=uid).update(
-                    {'start_timestamp': datetime.datetime.utcnow()})
         else:
-            start_time = user.start_timestamp
+            if user.start_timestamp is None:
+                start_time = datetime.datetime.utcnow()
+                session.query(models.User).filter_by(access_uuid=uid).update(
+                        {'start_timestamp': datetime.datetime.utcnow()})
+            else:
+                start_time = user.start_timestamp
 
         problems = get_problems(language)
-        print(problems)
         end_time = start_time + datetime.timedelta(hours=4)
         return jinja_env.get_template('problems.html').render(
                 user=user, msg=msg, problems=problems,
                 lang=language, hard_level=hard_level,
                 answer_lang=ANSWER_LANG,
+                exam_links=question_links,
                 end_time=end_time, i18n=i18n)
 
 
