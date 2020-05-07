@@ -165,29 +165,38 @@ def recv_solution(uid):
     upload = request.files.get('upload', None)
     language = request.forms.get('language')
     timestamp = datetime.datetime.utcnow()
-    if upload is not None:
-        if link:
-            bottle.redirect(
-                ('/user/{}/prob?msg=cannot+'
-                'upload+file+and+link+at+the+same+time').format(uid))
-        orig_name, ext = os.path.splitext(upload.filename)
-        new_filename = uuid.uuid4().hex + ext
-        upload.save(os.path.join(config.FILE_SAVE_DIR, new_filename))
-        link = os.path.join(config.STATIC_FILE_URL, new_filename)
-        print(link)
-    redirect_url = '/user/{}/prob?msg=success'.format(uid)
-    sub = models.Submission()
-    sub.link = link
-    sub.user_id = user_id
-    sub.prob_id = prob_id
-    sub.language = language
-    sub.timestamp = timestamp
     with session_scope() as session:
+        prev_submission = session.query(models.Submission).filter_by(
+                user_id=user_id, prob_id=prob_id).first()
+
+    if prev_submission:
+        filename = os.path.basename(prev_submission.link)
+        upload.save(os.path.join(config.FILE_SAVE_DIR, filename))
+        session.query(models.Submission).filter_by(
+                user_id=user_id, prob_id=prob_id).update(
+                        {'timestamp': timestamp})
+    else:
+        if upload is not None:
+            if link:
+                bottle.redirect(
+                    ('/user/{}/prob?msg=cannot+'
+                    'upload+file+and+link+at+the+same+time').format(uid))
+            orig_name, ext = os.path.splitext(upload.filename)
+            new_filename = uuid.uuid4().hex + ext
+            upload.save(os.path.join(config.FILE_SAVE_DIR, new_filename))
+            link = os.path.join(config.STATIC_FILE_URL, new_filename)
+        redirect_url = '/user/{}/prob?msg=success'.format(uid)
+        sub = models.Submission()
+        sub.link = link
+        sub.user_id = user_id
+        sub.prob_id = prob_id
+        sub.language = language
+        sub.timestamp = timestamp
         session.add(sub)
     return bottle.redirect(redirect_url)
 
 
-@bottle.get('/all_solutions')
+@bottle.get('/supersecreteurl/nadielosabra/asjfsadjflsdjl')
 def all_solutions():
     with session_scope() as session:
         submissions = session.query(models.Submission, models.User).filter(
