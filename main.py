@@ -148,7 +148,7 @@ def get_prob_page(uid):
                 start_time = user.start_timestamp
 
         problems = get_problems(language)
-        end_time = start_time + datetime.timedelta(hours=4)
+        end_time = start_time + datetime.timedelta(hours=5, minutes=30)
         return jinja_env.get_template('problems.html').render(
                 user=user, msg=msg, problems=problems,
                 lang=language, hard_level=hard_level,
@@ -207,9 +207,9 @@ def insert_users_from_file(path):
                     continue
                 u = models.User()
                 u.email = e
-                u.access_uuid = c
+                u.access_uuid = c[-32:]
                 session.add(u)
-                print('user', e)
+                print('user', e, c, len(c))
 
 def export_users(path):
     with open('/home/han/Downloads/easy_exam.csv.csv') as x:
