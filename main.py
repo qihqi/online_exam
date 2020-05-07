@@ -38,10 +38,14 @@ Estonian
 """.strip().split('\n'))
 
 question_links = {
-        'de_DE': 'https://drive.google.com/file/d/1fuDY49lV_2ylVZTQqB2-OOZ8mDiWceU0/view?usp=sharing',
+        'ar': 'https://drive.google.com/file/d/19acDQBnU6w1b3RfaoqnDjX_vu10jUyUM/view?usp=sharing',
+        'de_DE': 'https://drive.google.com/file/d/1KCsjhIJow90PSn6PDkeBL2_-hQloH8tP/view?usp=sharing'
+        'ee': 'https://drive.google.com/file/d/1lrPGVVxc7eAZ0tzlx8Q042GCpH4f3DNl/view?usp=sharing',
         'en': 'https://drive.google.com/file/d/1Z1pabuOsFnIidUbfnPF3VhA5SOfzDvOk/view?usp=sharing',
         'es_ES': 'https://drive.google.com/file/d/1V3mRHr7VMiXYtsnHEiZ88m6UxgWeAPd8/view?usp=sharing',
         'fr_FR': 'https://drive.google.com/file/d/1o30XQJf89stbcWtfHGSWaFxsmOBCxJ2c/view?usp=sharing',
+        'hu':'https://drive.google.com/file/d/1Qs4V_oT9NhrZzZiYLQ0UBg6YnOhuYNtq/view?usp=sharing',
+        'it': 'https://drive.google.com/file/d/1L21RXwUM3bExf7Wi2cFLezhBLWzc0M3z/view?usp=sharing',
         'uk': 'https://drive.google.com/file/d/1FreQgETTGxP1Y3ndKSHxM0QshcK3cebo/view?usp=sharing',
         'fa': 'https://drive.google.com/file/d/1SFcfQx_6hHr47NMtmzGHccuJGmOR7TRy/view?usp=sharing',
         'ru': 'https://drive.google.com/file/d/17hIoFGcoJ-JzL_VipGQeK6clYCVgF1sZ/view?usp=sharing',
