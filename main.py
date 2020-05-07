@@ -197,15 +197,17 @@ def all_solutions():
 
 def insert_users_from_file(path):
     with open(path) as f:
-        emails = set(f.read().split())
+        content = dict(csv.reader(f))
         with session_scope() as session:
             users = session.query(models.User).filter(
-                    models.User.email.in_(emails))
+                    models.User.email.in_(content.keys()))
             existing = {u.email for u in users}
-            for e in emails - existing:
+            for e, c in content.items():
+                if e in existing:
+                    continue
                 u = models.User()
                 u.email = e
-                u.access_uuid = uuid.uuid4().hex
+                u.access_uuid = c
                 session.add(u)
                 print('user', e)
 
