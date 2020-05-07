@@ -1,4 +1,4 @@
-<html>
+<html lang="{{lang}}">
   <head>
        <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
@@ -11,55 +11,73 @@
         <form action="" method="get">
             <label for="lang">Change language:</label>
             <select name="lang">
-                {% for l in languages %}
-                <option value="{{l}}"  {% if l == lang %} selected {%endif%}> {{ l[0]|upper}}{{l[1:]}} </option>
+                {% for l in i18n.all_locales %}
+                <option value="{{l}}"  {% if l == lang %} selected {%endif%}>
+                  {{ i18n.lang_name(l) }} </option>
                 {% endfor %}
             </select>
             <input type="submit">Submit</input>
         </form>
 
-        <h2> Hello {{ user.nickname }} welcome to QMO</h2>
-        {% if msg %}
-        <h3> {{ msg }} </h3>
-        {% endif %}
+        <h2> {{i18n.text(43, lang) }}</h2>
+
         <h3><a href=''>Click here to download the exam as pdf </a></h3>
         <h3> Times remain: <span id="time"></span>
 
-        {% for prob in problems %}
-        <div class="panel panel-default">
-          <div class="panel-heading">
-              <h3 class="panel-title">Problem {{loop.index}}</h3>
-          </div>
-          <div class="panel-body">
-              <p> {{ prob }} </p>
-                <form id="the_form" action="/upload_solution/{{user.access_uuid}}" method="post" enctype="multipart/form-data">
-                  <div class="input-group">
-                     <input name="prob_id" value="{{loop.index}}" type="hidden" />
-                     <input name="user_id" value="{{user.uid}}" type="hidden" />
-                     <p>
-                         <label for="lang">Answer language:</label>
-                         <select name="language">
-                             {% for l in answer_lang %}
-                             <option value="{{l}}" {% if l == lang %} selected {%endif%}>{{ l[0]|upper}}{{l[1:]}}</option>
-                             {% endfor %}
-                         </select>
-                     </p>
-                     <p>
-                         <label for="ans">Answer File:</label>
-                         <input name="upload" type="file" class="form-control" id="ans" placeholder="upload file" />
-                     </p>
-                  </div>
-                  <button class="btn btn-primary" id="submit_button">Submit</button>
-                </form>
-          </div>
-        </div>
+
+        {% for (label, probs) in problems %}
+
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                  <h3 class="panel-title">{{label}}</h3>
+              </div>
+              <div class="panel-body">
+                  {% for prob in probs %}
+                  <p>{{prob}}</p>
+                  {% endfor %}
+                  <form onSubmit="return checkform('ans{{loop.index}}');" id="the_form" action="/upload_solution/{{user.access_uuid}}" method="post" enctype="multipart/form-data">
+                      <div class="input-group">
+                         <input name="prob_id" value="{{loop.index}}" type="hidden" />
+                         <input name="user_id" value="{{user.uid}}" type="hidden" />
+                         <p>
+                             <label for="lang">Answer language:</label>
+                             <select name="language">
+                                 {% for ali in range(47, 57) %}
+                                 <option value="{{i18n.text(ali, 'en')}}">
+                                     {{ i18n.text(ali, lang) }}</option>
+                                 {% endfor %}
+                             </select>
+                         </p>
+                         <p>
+                             <label for="ans">Answer File:</label>
+                             <input name="upload" type="file" class="form-control" id="ans{{loop.index}}" placeholder="upload file" />
+                         </p>
+                      </div>
+                      <button class="btn btn-primary" id="submit_button">Submit</button>
+                    </form>
+              </div>
+            </div>
         {% endfor %}
 
         <script src="https://code.jquery.com/jquery-3.5.0.slim.min.js"></script>
   <!-- Latest compiled and minified JavaScript -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 <script>
     var end_time = {{ end_time.timestamp() }} * 1000;
     // Update the count down every 1 second
@@ -87,6 +105,22 @@
         document.getElementById("demo").innerHTML = "Finished!!";
       }
     }, 1000);
+
+    function checkform(selector) {
+        const fi = document.getElementById(selector);
+        if (fi.files.length > 0) {
+            let size_b = fi.files.item(0).size;
+            console.log('size is ', size_b);
+            if (size_b > 3 * 1024 * 1024) {
+                alert("File too big, please upload < 3MB");
+                return false;
+            }
+            return true;
+        } else {
+            alert("Please select file first");
+            return false;
+        }
+    }
 </script>
 
   </body>

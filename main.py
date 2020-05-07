@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import csv
 from contextlib import contextmanager
 import datetime
 import os
@@ -22,50 +23,56 @@ engine = sqlalchemy.create_engine(config.CONN_STRING)
 Session = sqlalchemy.orm.sessionmaker(bind=engine)
 jinja_env = Environment(loader=FileSystemLoader('template'))
 
-ALL_LANG = sorted("""
-english
-french
-spanish
-german
-uzbek
-italian
-russian
-chinese
-japanese
-albanian
-arabic
-hungarian
-ukranian
-portuguese
-dutch-flemish
-slovenian
-croatian
-latvian
-turkish
-hindi
-thai
-romanian
-""".strip().split('\n'))
 
 ANSWER_LANG = sorted("""
-english
-spanish
-french
-arabic
-russian
-german
-italian
-thai
-hungarian
-estonian
+English
+Spanish
+French
+Arabic
+Russian
+German
+Italian
+Thai
+Hungarian
+Estonian
 """.strip().split('\n'))
 
 
-def get_problems(hard_level, language):
-    root_dir = config.PROBLEM_DIR
-    fpath = os.path.join(root_dir, language, hard_level + '.txt')
-    with open(fpath) as f:
-        return f.read().split('\n\n')
+
+class I18nManager(object):
+
+    def __init__(self, csv_path):
+        with open(csv_path) as f:
+            reader = csv.reader(f)
+            self._contents = list(reader)
+            self.all_locales = self._contents[0]
+            self.locales_to_index = {
+                    locale : i for i, locale in enumerate(self.all_locales)}
+            self.name_to_index = {
+                    locale : i for i, locale in enumerate(self._contents[1])}
+
+    def text(self, position, locale):
+        lpos = self.locales_to_index[locale]
+        return self._contents[position - 1][lpos]
+
+    def lang_name(self, locale):
+        return self.text(2, locale)
+
+    def locale_name(self, name):
+        return self._contents[0][self.name_to_index[name]]
+
+
+i18n = I18nManager(config.TEXT_STR)
+
+
+def get_problems(language):
+    prob_indexes = [93, 95, 106, 112, 115, 124, 129]
+    ans = []
+    for i, j in zip(prob_indexes[:-1], prob_indexes[1:]):
+        label = i18n.text(i, language)
+        probs = [ i18n.text(x, language) for x in range(i + 1, j) ]
+        ans.append((label, probs))
+    return ans
 
 
 @contextmanager
@@ -105,13 +112,7 @@ def get_landing_page(uid):
 def get_prob_page(uid):
     msg = request.query.get('msg', '')
     hard_level = request.query.get('hard_level', 'easy')
-    language = request.query.get('lang', 'english')
-    if hard_level not in ('easy', 'hard'):
-        # error
-        pass
-    if language not in ('english', 'spanish'):
-        # error
-        pass
+    language = request.query.get('lang', 'en')
     with session_scope() as session:
         user = session.query(models.User).filter_by(access_uuid=uid).first()
         if user is None:
@@ -124,19 +125,18 @@ def get_prob_page(uid):
         else:
             start_time = user.start_timestamp
 
+        problems = get_problems(language)
+        print(problems)
         end_time = start_time + datetime.timedelta(hours=4)
-        problems = get_problems(hard_level, language)
         return jinja_env.get_template('problems.html').render(
-                user=user, problems=problems, msg=msg, 
-                lang=language, hard_level=hard_level, 
-                languages=ALL_LANG, answer_lang=ANSWER_LANG,
-                end_time=end_time)
+                user=user, msg=msg, problems=problems,
+                lang=language, hard_level=hard_level,
+                answer_lang=ANSWER_LANG,
+                end_time=end_time, i18n=i18n)
 
 
 @bottle.post('/upload_solution/<uid>')
 def recv_solution(uid):
-    print(request.forms.keys())
-    print(request.query.keys())
     prob_id = int(request.forms.get('prob_id'))
     link = request.forms.get('link')
     user_id = int(request.forms.get('user_id'))
@@ -187,6 +187,18 @@ def insert_users_from_file(path):
                 session.add(u)
                 print('user', e)
 
+def export_users(path):
+    with open('/home/han/Downloads/easy_exam.csv.csv') as x:
+        emails = set(x.read().split())
+    with open(path, 'w', newline='') as f:
+        csv_writer = csv.writer(f)
+        with session_scope() as session:
+            users = session.query(models.User).filter(
+                    models.User.email.in_(emails))
+            for user in users:
+                csv_writer.writerow((user.email, 
+                        'http://exam.gqmo.org/user/{}'.format(
+                            user.access_uuid)))
 
 
 application = bottle.default_app()
@@ -196,10 +208,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--insert_users', default='')
     parser.add_argument('--create_db', default='')
+    parser.add_argument('--export_users', default='')
     args = parser.parse_args()
     if args.create_db:
         models.Base.metadata.create_all(engine)
-    if args.insert_users:
+    elif args.insert_users:
         insert_users_from_file(args.insert_users)
+    elif args.export_users:
+        export_users(args.export_users)
     else:
         bottle.run(host='0.0.0.0', port=8099)
