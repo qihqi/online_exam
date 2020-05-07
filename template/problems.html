@@ -87,21 +87,21 @@
     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 <script>
-    var end_time = {{ end_time.timestamp() }} * 1000;
+    var budget = {{ budget_secs }} | 0;
+    var start_time = new Date();
     // Update the count down every 1 second
     var x = setInterval(function() {
 
-      // Get today's date and time
-      var now = new Date();
-      now = (now.getTime() + now.getTimezoneOffset() * 60 * 1000);
-
-      // Find the distance between now and the count down date
-      var distance = end_time - now;
-
       // Time calculations for days, hours, minutes and seconds
-      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      var curtime = new Date();
+      var passed = (curtime.getTime() - start_time.getTime()) / 1000;
+
+      let distance = budget - (passed|0);
+      console.log(budget, passed);
+      
+      var hours = Math.floor(distance / (60 * 60));
+      var minutes = Math.floor((distance / 60 % 60));
+      var seconds = Math.floor((distance % 60));
 
       // Display the result in the element with id="demo"
       document.getElementById("time").innerHTML = hours + "h "

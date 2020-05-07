@@ -149,12 +149,14 @@ def get_prob_page(uid):
 
         problems = get_problems(language)
         end_time = start_time + datetime.timedelta(hours=5, minutes=30)
+        current_time = datetime.datetime.utcnow()
+        budget_secs = (end_time - current_time).total_seconds()
         return jinja_env.get_template('problems.html').render(
                 user=user, msg=msg, problems=problems,
                 lang=language, hard_level=hard_level,
                 answer_lang=ANSWER_LANG,
                 exam_links=question_links,
-                end_time=end_time, i18n=i18n)
+                end_time=end_time, i18n=i18n, budget_secs=budget_secs)
 
 
 @bottle.post('/upload_solution/<uid>')
