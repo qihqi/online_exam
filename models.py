@@ -11,7 +11,7 @@ class User(Base):
     uid = Column(Integer, primary_key=True, autoincrement=True)
     nickname = Column(String(20))
     email = Column(String(100))
-    access_uuid = Column(String(20))
+    access_uuid = Column(String(32))
     preferred_lang = Column(String(20))
     submissions = relationship('Submission', backref=backref('user'))
     start_timestamp = Column(DateTime)

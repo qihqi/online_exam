@@ -173,9 +173,33 @@ def all_solutions():
         return jinja_env.get_template('submissions.html'
             ).render(submissions=submissions)
 
+def insert_users_from_file(path):
+    with open(path) as f:
+        emails = set(f.read().split())
+        with session_scope() as session:
+            users = session.query(models.User).filter(
+                    models.User.email.in_(emails))
+            existing = {u.email for u in users}
+            for e in emails - existing:
+                u = models.User()
+                u.email = e
+                u.access_uuid = uuid.uuid4().hex
+                session.add(u)
+                print('user', e)
+
+
 
 application = bottle.default_app()
 
 if __name__ == '__main__':
-    models.Base.metadata.create_all(engine)
-    bottle.run(host='0.0.0.0', port=8099)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--insert_users', default='')
+    parser.add_argument('--create_db', default='')
+    args = parser.parse_args()
+    if args.create_db:
+        models.Base.metadata.create_all(engine)
+    if args.insert_users:
+        insert_users_from_file(args.insert_users)
+    else:
+        bottle.run(host='0.0.0.0', port=8099)
