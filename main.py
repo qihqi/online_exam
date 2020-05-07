@@ -235,6 +235,19 @@ def export_users(path):
                         'http://exam.gqmo.org/user/{}'.format(
                             user.access_uuid)))
 
+def make_one_user(email): 
+    with session_scope() as session:
+        user = session.query(models.User).filter(
+                models.User.email == email).first()
+        if user is not None:
+            print('already exists', user.access_uuid)
+            return
+        user = models.User()
+        user.email = email
+        user.access_uuid = uuid.uuid4().hex
+        session.add(user)
+        print('created: ', user.access_uuid)
+
 
 application = bottle.default_app()
 
@@ -244,6 +257,7 @@ if __name__ == '__main__':
     parser.add_argument('--insert_users', default='')
     parser.add_argument('--create_db', default='')
     parser.add_argument('--export_users', default='')
+    parser.add_argument('--new_user', default='')
     args = parser.parse_args()
     if args.create_db:
         models.Base.metadata.create_all(engine)
@@ -251,5 +265,7 @@ if __name__ == '__main__':
         insert_users_from_file(args.insert_users)
     elif args.export_users:
         export_users(args.export_users)
+    elif args.new_user:
+        make_one_user(args.new_user)
     else:
         bottle.run(host='0.0.0.0', port=8099)
