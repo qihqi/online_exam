@@ -20,17 +20,19 @@
 
         <h3> Time remaining: <span id="time"></span>
 
+		<br />
+		<hr />
 
         {% for (label, probs) in problems %}
 
             <div class="panel panel-default">
               <div class="panel-heading">
-                  <h3 class="panel-title">{{label}}</h3>
+                  <h3 class="panel-title">Problem {{loop.index}}</h3>
               </div>
               {% if loop.index in submissions_numbers %}
-                 Answer recorded.
+                 Answer recorded (Repeated upload will overwrite existing solution).
               {% else %}
-                 Not answered yet.
+                 No answer yet.
               {% endif %}
               <div class="panel-body">
                   {#
@@ -55,12 +57,15 @@
                              <label for="ans">Answer File:</label>
                              <input name="upload" type="file" class="form-control" id="ans{{loop.index}}" placeholder="upload file" />
                          </p>
+			 <p>    <button class="btn btn-primary" id="submit_button">Submit</button></p>
                       </div>
-                      <button class="btn btn-primary" id="submit_button">Submit</button>
+
                     </form>
               </div>
             </div>
         {% endfor %}
+
+	<h3> Good luck, have fun! </h3>
 
         <script src="https://code.jquery.com/jquery-3.5.0.slim.min.js"></script>
   <!-- Latest compiled and minified JavaScript -->
