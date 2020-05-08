@@ -142,6 +142,9 @@ def get_prob_page(uid):
         if user is None:
             return 'Access Id not found'
 
+        submissions_numbers = {s.prob_id for s in user.submissions}
+
+        print('sub', submissions_numbers)
         if TESTONLY:
             start_time = datetime.datetime.utcnow()
         else:
@@ -161,7 +164,8 @@ def get_prob_page(uid):
                 lang=language, hard_level=hard_level,
                 answer_lang=ANSWER_LANG,
                 exam_links=question_links,
-                end_time=end_time, i18n=i18n, budget_secs=budget_secs)
+                end_time=end_time, i18n=i18n, budget_secs=budget_secs,
+                submissions_numbers=submissions_numbers)
 
 
 @bottle.post('/upload_solution/<uid>')
@@ -176,31 +180,33 @@ def recv_solution(uid):
         prev_submission = session.query(models.Submission).filter_by(
                 user_id=user_id, prob_id=prob_id).first()
 
-    if prev_submission:
-        filename = os.path.basename(prev_submission.link)
-        upload.save(os.path.join(config.FILE_SAVE_DIR, filename))
-        session.query(models.Submission).filter_by(
-                user_id=user_id, prob_id=prob_id).update(
-                        {'timestamp': timestamp})
-    else:
-        if upload is not None:
-            if link:
-                bottle.redirect(
-                    ('/user/{}/prob?msg=cannot+'
-                    'upload+file+and+link+at+the+same+time').format(uid))
-            orig_name, ext = os.path.splitext(upload.filename)
-            new_filename = uuid.uuid4().hex + ext
-            upload.save(os.path.join(config.FILE_SAVE_DIR, new_filename))
-            link = os.path.join(config.STATIC_FILE_URL, new_filename)
         redirect_url = '/user/{}/prob?msg=success'.format(uid)
-        sub = models.Submission()
-        sub.link = link
-        sub.user_id = user_id
-        sub.prob_id = prob_id
-        sub.language = language
-        sub.timestamp = timestamp
-        session.add(sub)
-    return bottle.redirect(redirect_url)
+        if prev_submission:
+            filename = os.path.basename(prev_submission.link)
+            upload.save(os.path.join(config.FILE_SAVE_DIR, filename),
+                        overwrite=True)
+            session.query(models.Submission).filter_by(
+                    user_id=user_id, prob_id=prob_id).update(
+                            {'timestamp': timestamp})
+        else:
+            if upload is not None:
+                if link:
+                    bottle.redirect(
+                        ('/user/{}/prob?msg=cannot+'
+                        'upload+file+and+link+at+the+same+time').format(uid))
+                orig_name, ext = os.path.splitext(upload.filename)
+                new_filename = uuid.uuid4().hex + ext
+                upload.save(os.path.join(config.FILE_SAVE_DIR, new_filename))
+                link = os.path.join(config.STATIC_FILE_URL, new_filename)
+            sub = models.Submission()
+            sub.link = link
+            sub.user_id = user_id
+            sub.prob_id = prob_id
+            sub.language = language
+            sub.timestamp = timestamp
+            session.add(sub)
+            session.commit()
+        return bottle.redirect(redirect_url)
 
 
 @bottle.get('/supersecreteurl/nadielosabra/asjfsadjflsdjl')

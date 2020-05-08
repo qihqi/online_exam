@@ -37,6 +37,11 @@
               <div class="panel-heading">
                   <h3 class="panel-title">{{label}}</h3>
               </div>
+              {% if loop.index in submissions_numbers %}
+                 Answer recorded.
+              {% else %}
+                 Not answered yet.
+              {% endif %}
               <div class="panel-body">
                   {#
                   {% for prob in probs %}
