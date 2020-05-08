@@ -93,6 +93,13 @@ def get_problems(language):
         ans.append((label, probs))
     return ans
 
+def is_test():
+    curtime = datetime.datetime.utcnow()
+    if curtime < datetime.datetime(2020, 5, 8, 12, 0, 0):
+        return True
+    else:
+        return False
+
 
 @contextmanager
 def session_scope():
@@ -132,7 +139,7 @@ def get_prob_page(uid):
     hard_level = request.query.get('hard_level', 'easy')
     language = request.query.get('lang', 'en')
 
-    if TESTONLY:
+    if is_test():
         passcode = request.query.get('testonly', None)
         if passcode != 'soy un arrecho':
             return 'Exam not started yet'
@@ -145,7 +152,7 @@ def get_prob_page(uid):
         submissions_numbers = {s.prob_id for s in user.submissions}
 
         print('sub', submissions_numbers)
-        if TESTONLY:
+        if is_test():
             start_time = datetime.datetime.utcnow()
         else:
             if user.start_timestamp is None:
