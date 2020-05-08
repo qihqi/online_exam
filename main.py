@@ -39,7 +39,7 @@ Estonian
 
 question_links = {
         'ar': 'https://drive.google.com/file/d/19acDQBnU6w1b3RfaoqnDjX_vu10jUyUM/view?usp=sharing',
-        'de_DE': 'https://drive.google.com/file/d/1KCsjhIJow90PSn6PDkeBL2_-hQloH8tP/view?usp=sharing'
+        'de_DE': 'https://drive.google.com/file/d/1KCsjhIJow90PSn6PDkeBL2_-hQloH8tP/view?usp=sharing',
         'ee': 'https://drive.google.com/file/d/1lrPGVVxc7eAZ0tzlx8Q042GCpH4f3DNl/view?usp=sharing',
         'en': 'https://drive.google.com/file/d/1Z1pabuOsFnIidUbfnPF3VhA5SOfzDvOk/view?usp=sharing',
         'es_ES': 'https://drive.google.com/file/d/1V3mRHr7VMiXYtsnHEiZ88m6UxgWeAPd8/view?usp=sharing',
@@ -72,6 +72,8 @@ class I18nManager(object):
         return self._contents[position - 1][lpos]
 
     def lang_name(self, locale):
+        if locale == 'ee':
+            return 'Estonian'
         return self.text(2, locale)
 
     def locale_name(self, name):
@@ -111,7 +113,6 @@ def static(path):
     return bottle.static_file(path, root='static')
 
 
-@bottle.get('/')
 def index():
     return bottle.static_file('mock.html', root='static')
 
