@@ -174,7 +174,9 @@ def get_prob_page(uid):
                 answer_lang=ANSWER_LANG,
                 exam_links=question_links,
                 end_time=end_time, i18n=i18n, budget_secs=budget_secs,
-                submissions_numbers=submissions_numbers)
+                submissions_numbers=submissions_numbers,
+                time_start_utc='{}:{}:{}'.format(
+                    start_time.hour, start_time.minute, start_time.second))
 
 
 @bottle.post('/upload_solution/<uid>')

@@ -18,7 +18,9 @@
         </span>
         {% endfor %}
 
-        <h3> Time remaining: <span id="time"></span>
+        <h3> Time start UTC: {{ time_start_utc }} </span> </h3>
+        <h3> Current time UTC: <span id="curtime"></span> </h3>
+        <h3> Time remaining: <span id="time"></span> </h3>
 
 		<br />
 		<hr />
@@ -94,6 +96,9 @@
 
       // Time calculations for days, hours, minutes and seconds
       var curtime = new Date();
+      var curtime_str = curtime.getUTCHours() + ":"
+            + curtime.getUTCMinutes() + ":" + curtime.getUTCSeconds();
+      document.getElementById("curtime").innerHTML = curtime_str;
       var passed = (curtime.getTime() - start_time.getTime()) / 1000;
 
       let distance = budget - (passed|0);
@@ -107,11 +112,6 @@
       document.getElementById("time").innerHTML = hours + "h "
       + minutes + "m " + seconds + "s ";
 
-      // If the count down is finished, write some text
-      if (distance < 0) {
-        clearInterval(x);
-        document.getElementById("demo").innerHTML = "Finished!!";
-      }
     }, 1000);
 
     function checkform(selector) {
