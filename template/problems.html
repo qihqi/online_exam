@@ -116,6 +116,9 @@
 
     function checkform(selector) {
         const fi = document.getElementById(selector);
+        // Time calculations for days, hours, minutes and seconds
+        var curtime = new Date();
+        var passed = (curtime.getTime() - start_time.getTime()) / 1000;
         if (fi.files.length > 0) {
             let size_b = fi.files.item(0).size;
             console.log('size is ', size_b);
@@ -123,6 +126,10 @@
                 alert("{{i18n.text(69, lang)}}");
                 return false;
             }
+	    if (passed > budget) {
+	       alert('Time has passed');
+	       return false;
+	    }
             return true;
         } else {
             alert("Please select file first");

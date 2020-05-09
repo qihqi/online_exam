@@ -42,7 +42,9 @@ question_links = {
         'de_DE': 'https://drive.google.com/file/d/1KCsjhIJow90PSn6PDkeBL2_-hQloH8tP/view?usp=sharing',
         'ee': 'https://drive.google.com/file/d/1lrPGVVxc7eAZ0tzlx8Q042GCpH4f3DNl/view?usp=sharing',
         'en': 'https://drive.google.com/file/d/1Z1pabuOsFnIidUbfnPF3VhA5SOfzDvOk/view?usp=sharing',
-        'es_ES': 'https://drive.google.com/file/d/1V3mRHr7VMiXYtsnHEiZ88m6UxgWeAPd8/view?usp=sharing',
+
+        'es_ES': 'https://cdn.discordapp.com/attachments/695318355468353546/708464427934023690/easy_5.pdf',
+        # 'https://drive.google.com/file/d/18FZoByX7pUMrPUDldLgbBX-ZcZFnM4AC/view?usp=sharing',
         'fr_FR': 'https://drive.google.com/file/d/1o30XQJf89stbcWtfHGSWaFxsmOBCxJ2c/view?usp=sharing',
         'hu':'https://drive.google.com/file/d/1Qs4V_oT9NhrZzZiYLQ0UBg6YnOhuYNtq/view?usp=sharing',
         'it': 'https://drive.google.com/file/d/1L21RXwUM3bExf7Wi2cFLezhBLWzc0M3z/view?usp=sharing',
