@@ -4,6 +4,7 @@
 import csv
 from contextlib import contextmanager
 import datetime
+import json
 import os
 import uuid
 
@@ -12,6 +13,7 @@ from jinja2 import Environment, FileSystemLoader
 import bottle
 from bottle import request, response
 import sqlalchemy
+from sqlalchemy.sql.expression import func
 
 import models
 import config
@@ -178,6 +180,62 @@ def get_prob_page(uid):
                 time_start_utc='{}:{}:{}'.format(
                     start_time.hour, start_time.minute, start_time.second))
 
+@bottle.get('/submission')
+def get_prob():
+    lang = request.query.get('lang')
+    prob_id = request.query.get('prob_id')
+    grader = request.query.get('not_graded_by')
+    if lang is None or prob_id is None:
+        return {'status': 'miss argument'}
+    with session_scope() as session:
+
+        graded_by_this = {
+            s.submission_id for s in 
+            session.query(models.Score).filter_by(grader=grader)}
+
+        c_solution = session.query(func.count(models.Score.uid), 
+                models.Submission).outerjoin(models.Score).filter(
+                models.Submission.prob_id == prob_id).filter(
+                models.Submission.language == lang
+                ).group_by(
+                        models.Submission.uid).having(
+                                func.count(models.Score.uid) <= 1)
+
+        c, solution = None, None
+        for c_sol in c_solution:
+            if c_sol[1].uid not in graded_by_this:
+                c, solution = c_sol
+                break
+        if c is None:
+            return {'status': 'not_found'}
+
+        return {
+            'status': 'found',
+            'link': solution.link,
+            'prob_id': solution.prob_id,
+            'lang': solution.language,
+            'scores_count': c,
+            'submission_id': solution.uid,
+            'timestamp': solution.timestamp.isoformat(),
+            'start_time': solution.user.start_timestamp.isoformat(),
+        }
+
+
+@bottle.post('/submission/<uid>/score')
+def create_score(uid):
+    score_prop = json.loads(request.body.read())
+    print(score_prop)
+    with session_scope() as session:
+        new_score = models.Score()
+        new_score.submission_id = uid
+        new_score.comment = score_prop['comment']
+        new_score.grader = score_prop['grader']
+        new_score.score = score_prop['score']
+        new_score.timestamp = datetime.datetime.utcnow()
+        session.add(new_score)
+        session.commit()
+    return {'status': 'success'}
+
 
 @bottle.post('/upload_solution/<uid>')
 def recv_solution(uid):
@@ -227,6 +285,12 @@ def all_solutions():
                 models.Submission.user_id == models.User.uid)
         return jinja_env.get_template('submissions.html'
             ).render(submissions=submissions)
+
+
+@bottle.get('/supersecreteurl/gradingpage')
+def grading_page():
+    return jinja_env.get_template('grading.html').render(answer_langs=ANSWER_LANG)
+
 
 def insert_users_from_file(path):
     with open(path) as f:

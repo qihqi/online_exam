@@ -1,0 +1,156 @@
+<html>
+  <head>
+       <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+  </head>
+    <body class="container">
+        <p>
+        <label for="lang">Your Name:</label>
+        <input id="grader" />
+        </p>
+        <p>
+        <label for="lang">Answer language:</label>
+        <select id="lang" name="language">
+            {% for lang in answer_langs %}
+            <option value="{{lang}}">
+            {{ lang }} </option>
+            {% endfor %}
+        </select>
+
+        <label for="question">Problem #:</label>
+        <select id="question" name="question">
+            {% for ali in range(1, 7) %}
+            <option value="{{ali}}">
+            {{ ali }}</option>
+            {% endfor %}
+        </select>
+        <button id="getproblem">Get Problem Solution</button>
+        </p>
+        <table class="table" id="link">
+            <tr>
+                <th>Status</th>
+                <th>Prob #</th>
+                <th>Language</th>
+                <th>Start time</th>
+                <th>Submit time</th>
+                <th>Link</th>
+            </tr>
+        </table>
+        <div id="score_area" style="display:none;">
+
+            <p>
+            Comments:
+            <textarea class="form-control" id="comments" cols="50" rows="10"></textarea>
+            </p>
+
+            <p>
+            Score:
+            <input  class="form-control" type="text" id="score" />
+            </p>
+            <button class="btn" id="submit_score">Submit</button>
+        </div>
+    <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+        var current_submission_id = null;
+        var current_graded = true;
+        function get_problem() {
+            let prob_num = $('#question').val();
+            let lang = $('#lang').val();
+            let grader = $('#grader').val();
+            if (grader.length == 0) {
+                alert('please write your name');
+                return;
+            }
+            if (!current_graded) {
+                alert('please grade the current problem');
+                return;
+            }
+            $('#score_area').hide();
+            $.ajax({
+                url: ('/submission?prob_id=' + prob_num + 
+                      '&lang=' + lang + '&not_graded_by=' + grader),
+                success: function(result) {
+                    console.log(result);
+                    if (result.status == 'found') {
+                        current_submission_id = result.submission_id;
+                        current_graded = false;
+                        let row = $('<tr>');
+                        let scell =  $('<td>');
+                        scell.attr('id', 'status' + current_submission_id);
+                        row.append(scell);
+                        row.append( $('<td>' + result.prob_id + '</td>'));
+                        row.append( $('<td>' + result.lang + '</td>'));
+                        row.append( $('<td>' + result.start_time + '</td>'));
+                        row.append( $('<td>' + result.timestamp + '</td>'));
+                        let linktd = $('<td>');
+                        row.append(linktd);
+                        let link = $('<a>');
+                        link.attr('href', '/' + result.link);
+                        link.html(result.link);
+                        link.attr('download', '');
+                        linktd.append(link);
+                        $('#link').append(row);
+                        $('#score_area').show();
+                        $('#grader').attr('disabled', '');
+                    } else if (result.status == 'not_found') {
+                        alert('all problems in this category has been graded! Good job!');
+                    }
+                },
+                failure: function() { alert(' ajax failed'); }
+            });
+        }
+
+        function submit_score() {
+            if (current_submission_id == null) {
+               alert('havent selected a problem');
+               return;
+            }
+            let score = parseInt($('#score').val());
+            console.log(score);
+            if (Number.isNaN(score)) {
+                alert('score should be a number');
+                return;
+            }
+            let comment = $('#comments').val();
+            let grader = $('#grader').val();
+            if (grader.length == 0) {
+                alert('please write your name');
+                return;
+            }
+            $.ajax({
+                url: '/submission/' + current_submission_id + '/score',
+                method: 'POST',
+                data: JSON.stringify({
+                    'grader': grader,
+                    'comment': comment,
+                    'score': score,
+                }),
+                success: function () {
+                    let another = confirm('score saved, get another one?');
+                    current_graded = true;
+                    $('#status' + current_submission_id).html('Done');
+                    $('#comment').val('');
+                    $('#score').val('');
+                    if (another) {
+                        get_problem();
+                    }
+                },
+                failure: function () {
+                    alert('failed in save, try again');
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            $('#getproblem').click(get_problem);
+            $('#submit_score').click(submit_score);
+        });
+    </script>
+    </body>
+</html>

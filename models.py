@@ -26,4 +26,17 @@ class Submission(Base):
     link = Column(Text)
     language = Column(Text)
     timestamp = Column(DateTime)
+    scores = relationship('Score', backref=backref('submission'))
+
+
+class Score(Base):
+
+    __tablename__ = 'scores'
+    uid = Column(Integer, primary_key=True, autoincrement=True)
+    submission_id = Column(Integer,  ForeignKey(Submission.uid))
+    grader = Column(String(50))
+    timestamp = Column(DateTime)
+    score = Column(Integer)
+    comment = Column(Text)
+
 
