@@ -49,6 +49,7 @@
             <p>
             Score:
             <input  class="form-control" type="text" id="score" />
+            Unable to grade: <input type="checkbox" id="unable" />
             </p>
             <button class="btn" id="submit_score">Submit</button>
         </div>
@@ -112,10 +113,21 @@
                return;
             }
             let score = parseInt($('#score').val());
-            console.log(score);
-            if (Number.isNaN(score)) {
-                alert('score should be a number');
-                return;
+            if ($('#unable').prop('checked')) {
+                score = -1;
+            } else {
+                if (Number.isNaN(score)) {
+                    alert('score should be a number');
+                    return;
+                }
+                if (score < 0) {
+                    alert('score should be positive');
+                    return;
+                }
+                if (score > 7) {
+                    alert('score should be less than 7');
+                    return;
+                }
             }
             let comment = $('#comments').val();
             let grader = $('#grader').val();
