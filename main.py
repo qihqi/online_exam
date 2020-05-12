@@ -139,6 +139,7 @@ def get_landing_page(uid):
 
 @bottle.get('/user/<uid>/prob')
 def get_prob_page(uid):
+    return 'Exam ended'
     msg = request.query.get('msg', '')
     hard_level = request.query.get('hard_level', 'easy')
     language = request.query.get('lang', 'en')
