@@ -29,7 +29,7 @@
         </select>
         <button id="getproblem">Get Problem Solution</button>
         </p>
-        <table class="table" id="link">
+        <table class="table">
             <tr>
                 <th>Status</th>
                 <th>Prob #</th>
@@ -38,6 +38,7 @@
                 <th>Submit time</th>
                 <th>Link</th>
             </tr>
+            <tbody id="link"></tbody>
         </table>
         <div id="score_area" style="display:none;">
 
@@ -150,6 +151,7 @@
                     $('#comment').val('');
                     $('#score').val('');
                     $('#unable').prop('checked', false);
+                    $('#link').html('');
                     if (another) {
                         get_problem();
                     }
