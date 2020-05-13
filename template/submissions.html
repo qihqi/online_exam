@@ -17,6 +17,7 @@
                     <th scope="col">Language</th>
                     <th scope="col">Timestamp UTC</th>
                     <th scope="col">Link </th>
+                    <th scope="col">Num Scorings</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,6 +28,7 @@
                     <td scope="col">{{ sub.language }}</td>
                     <td scope="col">{{ sub.timestamp.isoformat() }}</td>
                     <td scope="col"><a href="/{{ sub.link }}">{{ sub.link }}</a></td>
+                    <td scope="col">{{ scores.get(sub.uid, 0) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -282,10 +282,16 @@ def recv_solution(uid):
 @bottle.get('/supersecreteurl/nadielosabra/asjfsadjflsdjl')
 def all_solutions():
     with session_scope() as session:
-        submissions = session.query(models.Submission, models.User).filter(
-                models.Submission.user_id == models.User.uid)
+        scores = dict(session.query(
+                models.Score.submission_id,
+                func.count(models.Score.uid)).group_by(
+                        models.Score.submission_id))
+        submissions = sorted(
+                session.query(models.Submission, models.User).filter(
+                models.Submission.user_id == models.User.uid),
+                key=lambda x: scores.get(x[0].uid, 0))
         return jinja_env.get_template('submissions.html'
-            ).render(submissions=submissions)
+            ).render(submissions=submissions, scores=scores)
 
 
 @bottle.get('/supersecreteurl/gradingpage')
