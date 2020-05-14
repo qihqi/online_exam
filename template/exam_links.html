@@ -48,15 +48,15 @@
         </table>
 
         <h2> Add new: </h2>
-        <form method="post">
+        <form method="post" onsubmit="return check_exists();">
         Test name:
-              <select name="test_name" >
+              <select id="new_test_name" name="test_name" >
                  {% for l in levels %}
                  <option value="{{l}}" {% if loop.index == 0 %} selected {%endif%}> {{l}} </option>
                  {% endfor %}
              </select>
         Language:
-             <select name="language" >
+             <select name="language" id="new_language" >
                  {% for l in languages%}
                  <option value="{{l}}" {% if loop.index == 0 %} selected {%endif%}> {{l}} </option>
                  {% endfor %}
@@ -76,6 +76,21 @@
 
 
 <script>
+  var already_exists = [];
+{% for p in all_problems %}
+  already_exists.push(["{{p.test_name}}", "{{p.language}}"]);
+{% endfor %}
+  function check_exists() {
+      var lang = $('#new_language').val();
+      var test_name = $('#new_test_name').val();
+      for (var p of already_exists) {
+          if (lang == p[1] && test_name == p[0]) {
+              alert( lang + " for " + test_name + " already exists.");
+              return false;
+          }
+      }
+      return true;
+  }
   $(document).ready(function() {
       $('.edit_button').on('click', function(b) {
           let me = $(b.target)
@@ -92,8 +107,8 @@
           let me = $(b.target)
           let pid = me.attr('problem_id');
           console.log(pid);
-          var lang = $('#lang_' + pid).val();
-          var name = $('#level_' + pid).val();
+          var lang = $('#lang_' + pid).val() || 'Arabic';
+          var name = $('#level_' + pid).val() || 'hard_day_1';
           var link = $('#link_' + pid).val();
           var active = $('#active_' + pid).is(':checked');
           $.ajax({

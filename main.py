@@ -337,14 +337,15 @@ def problem_links():
 
 @bottle.post('/supersecreteurl/blahblah/problem_links')
 def new_problem_links():
-    language = request.forms.get('languages')
-    exam_name = request.forms.get('exam_name')
+    language = request.forms.get('language')
+    exam_name = request.forms.get('test_name')
     link = request.forms.get('link')
+
     with session_scope() as session:
         exam = models.ExamPaper()
         exam.language = language
         exam.link = link
-        exam.exam_name = exam_name
+        exam.test_name = exam_name
         session.add(exam)
         session.commit()
     bottle.redirect('/supersecreteurl/blahblah/problem_links')
