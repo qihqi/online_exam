@@ -1,0 +1,123 @@
+<html>
+  <head>
+       <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+  </head>
+
+  <body class="container">
+
+        <h2> Current exam links: </h2>
+
+        <table class="table">
+            <tr>
+                <th> Type </th>
+                <th> Language </th>
+                <th> Link </th>
+                <th> Is active </th>
+                <th> </th>
+            </tr>
+            <tbody>
+            {% for p in all_problems %}
+              <tr>
+                  <td>
+                      <select id="level_{{p.uid}}" disabled class="problem_{{p.uid}}" >
+                         {% for l in levels %}
+                         <option value="{{l}}" {% if p.test_name == l %} selected {%endif%} > {{l}} </option>
+                         {% endfor %}
+                     </select>
+                  </td>
+                  <td>
+                     <select id="lang_{{p.uid}}" disabled>
+                         {% for l in languages%}
+                         <option value="{{l}}" {% if p.language == l %} selected {%endif%} > {{l}} </option>
+                         {% endfor %}
+                     </select>
+                  </td>
+                  <td><input id="link_{{p.uid}}" value="{{p.link}}" disabled/> </td>
+                  <td><input id="active_{{p.uid}}" type="checkbox" {%if p.is_active %} checked {% endif %} disabled/> </td>
+                  <td>
+                      <button id="edit_{{p.uid}}" problem_id="{{p.uid}}" class="edit_button" >Edit</button>
+                      <button id="save_{{p.uid}}" problem_id="{{p.uid}}" style="display:none" class="save_button">Save</button>
+                  </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <h2> Add new: </h2>
+        <form method="post">
+        Test name:
+              <select name="test_name" >
+                 {% for l in levels %}
+                 <option value="{{l}}" {% if loop.index == 0 %} selected {%endif%}> {{l}} </option>
+                 {% endfor %}
+             </select>
+        Language:
+             <select name="language" >
+                 {% for l in languages%}
+                 <option value="{{l}}" {% if loop.index == 0 %} selected {%endif%}> {{l}} </option>
+                 {% endfor %}
+             </select>
+        Link:
+          <input name="link" placeholder="problem link"/>
+          <input type="submit" />
+
+        </form>
+
+    <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+
+
+
+<script>
+  $(document).ready(function() {
+      $('.edit_button').on('click', function(b) {
+          let me = $(b.target)
+          let pid = me.attr('problem_id');
+          console.log(pid);
+          $('#save_' + pid).show();
+          $('#level_' + pid).prop('disabled', false);
+          $('#lang_' + pid).prop('disabled', false);
+          $('#link_' + pid).prop('disabled', false);
+          $('#active_' + pid).prop('disabled', false);
+          me.hide();
+      });
+      $('.save_button').on('click', function(b) {
+          let me = $(b.target)
+          let pid = me.attr('problem_id');
+          console.log(pid);
+          var lang = $('#lang_' + pid).val();
+          var name = $('#level_' + pid).val();
+          var link = $('#link_' + pid).val();
+          var active = $('#active_' + pid).is(':checked');
+          $.ajax({
+              url: ('/exam/' + pid),
+              method: 'PUT',
+              data: JSON.stringify({
+                  language: lang,
+                  test_name: name,
+                  link: link,
+                  is_active: active
+              }),
+              success: function(result) {
+                  $('#edit_' + pid).show();
+                  $('#level_' + pid).prop('disabled', true);
+                  $('#lang_' + pid).prop('disabled', true);
+                  $('#link_' + pid).prop('disabled', true);
+                  $('#active_' + pid).prop('disabled', true);
+                  me.hide();
+              },
+              failure: function() { alert(' save failed, please retry'); }
+          });
+      });
+  });
+</script>
+
+  </body>
+</html>
