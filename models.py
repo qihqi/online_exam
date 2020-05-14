@@ -1,4 +1,4 @@
-from sqlalchemy import (Column, Integer, DateTime, String, ForeignKey, Text)
+from sqlalchemy import (Column, Integer, DateTime, String, ForeignKey, Text, Boolean)
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -40,3 +40,11 @@ class Score(Base):
     comment = Column(Text)
 
 
+class ExamPaper(Base):
+
+    __tablename__ = 'exams'
+    uid = Column(Integer, primary_key=True, autoincrement=True)
+    test_name = Column(String(20))
+    language = Column(String(20))
+    link = Column(Text)
+    is_active = Column(Boolean)

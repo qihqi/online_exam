@@ -39,25 +39,6 @@ Hungarian
 Estonian
 """.strip().split('\n'))
 
-question_links = {
-        'ar': 'https://drive.google.com/file/d/19acDQBnU6w1b3RfaoqnDjX_vu10jUyUM/view?usp=sharing',
-        'de_DE': 'https://drive.google.com/file/d/1KCsjhIJow90PSn6PDkeBL2_-hQloH8tP/view?usp=sharing',
-        'ee': 'https://drive.google.com/file/d/1lrPGVVxc7eAZ0tzlx8Q042GCpH4f3DNl/view?usp=sharing',
-        'en': 'https://drive.google.com/file/d/1Z1pabuOsFnIidUbfnPF3VhA5SOfzDvOk/view?usp=sharing',
-
-        'es_ES': 'https://cdn.discordapp.com/attachments/695318355468353546/708464427934023690/easy_5.pdf',
-        # 'https://drive.google.com/file/d/18FZoByX7pUMrPUDldLgbBX-ZcZFnM4AC/view?usp=sharing',
-        'fr_FR': 'https://drive.google.com/file/d/1o30XQJf89stbcWtfHGSWaFxsmOBCxJ2c/view?usp=sharing',
-        'hu':'https://drive.google.com/file/d/1Qs4V_oT9NhrZzZiYLQ0UBg6YnOhuYNtq/view?usp=sharing',
-        'it': 'https://drive.google.com/file/d/1L21RXwUM3bExf7Wi2cFLezhBLWzc0M3z/view?usp=sharing',
-        'uk': 'https://drive.google.com/file/d/1FreQgETTGxP1Y3ndKSHxM0QshcK3cebo/view?usp=sharing',
-        'fa': 'https://drive.google.com/file/d/1SFcfQx_6hHr47NMtmzGHccuJGmOR7TRy/view?usp=sharing',
-        'ru': 'https://drive.google.com/file/d/17hIoFGcoJ-JzL_VipGQeK6clYCVgF1sZ/view?usp=sharing',
-        'th': 'https://drive.google.com/file/d/1mQVsbl6vymaTdI_Cybd-Kg1-HT69m-NZ/view?usp=sharing',
-        'uk': 'https://drive.google.com/file/d/1BPHdBP5H3hQFaxDwPVq2M6uMYHEuxkvf/view?usp=sharing',
-        }
-
-
 
 class I18nManager(object):
 
@@ -137,12 +118,19 @@ def get_landing_page(uid):
             uid=uid)
 
 
-@bottle.get('/user/<uid>/prob')
-def get_prob_page(uid):
-    return 'Exam ended'
+@bottle.get('/user/<uid>/prob/<pid>')
+def get_prob_page(uid, pid):
     msg = request.query.get('msg', '')
-    hard_level = request.query.get('hard_level', 'easy')
     language = request.query.get('lang', 'en')
+
+    level = {
+            'jiwls': 'hard_day_1',
+            'oweiur': 'hard_day_2',
+            }.get(pid)
+
+    if not level:
+        return 'Exam not started yet'
+
 
     if is_test():
         passcode = request.query.get('testonly', None)
@@ -156,7 +144,6 @@ def get_prob_page(uid):
 
         submissions_numbers = {s.prob_id for s in user.submissions}
 
-        print('sub', submissions_numbers)
         if is_test():
             start_time = datetime.datetime.utcnow()
         else:
@@ -167,17 +154,23 @@ def get_prob_page(uid):
             else:
                 start_time = user.start_timestamp
 
+        statements = session.query(models.ExamPaper).filter_by(
+                is_active=True, test_name=level).all()
+        if not statements:
+            return 'Exam not started yet'
+
+        print([(s.language, s.is_active) for s in statements])
         problems = get_problems(language)
         end_time = start_time + datetime.timedelta(hours=5, minutes=30)
         current_time = datetime.datetime.utcnow()
         budget_secs = (end_time - current_time).total_seconds()
         return jinja_env.get_template('problems.html').render(
                 user=user, msg=msg, problems=problems,
-                lang=language, hard_level=hard_level,
+                lang=language,
                 answer_lang=ANSWER_LANG,
-                exam_links=question_links,
                 end_time=end_time, i18n=i18n, budget_secs=budget_secs,
                 submissions_numbers=submissions_numbers,
+                statements=statements,
                 time_start_utc='{}:{}:{}'.format(
                     start_time.hour, start_time.minute, start_time.second))
 
@@ -256,8 +249,9 @@ def recv_solution(uid):
             upload.save(os.path.join(config.FILE_SAVE_DIR, filename),
                         overwrite=True)
             session.query(models.Submission).filter_by(
-                    user_id=user_id, prob_id=prob_id).update(
+                    uid=prev_submission.uid).update(
                             {'timestamp': timestamp})
+            session.commit()
         else:
             if upload is not None:
                 if link:
@@ -301,19 +295,22 @@ def grading_page():
 
 def insert_users_from_file(path):
     with open(path) as f:
-        content = dict(csv.reader(f))
+        content = list(csv.reader(f))
         with session_scope() as session:
             users = session.query(models.User).filter(
-                    models.User.email.in_(content.keys()))
+                    models.User.email.in_(content))
             existing = {u.email for u in users}
-            for e, c in content.items():
+            for e in content.items():
                 if e in existing:
                     continue
                 u = models.User()
                 u.email = e
-                u.access_uuid = c[-32:]
+                access = uuid.uuid4()
+                u.access_uuid = access
                 session.add(u)
-                print('user', e, c, len(c))
+                print('user', e, access)
+            session.commit()
+
 
 def export_users(path):
     with open('/home/han/Downloads/easy_exam.csv.csv') as x:
@@ -327,6 +324,42 @@ def export_users(path):
                 csv_writer.writerow((user.email, 
                         'http://exam.gqmo.org/user/{}'.format(
                             user.access_uuid)))
+
+@bottle.get('/supersecreteurl/blahblah/problem_links')
+def problem_links():
+    exam_names = ["hard_day_1", "hard_day_2"]
+    with session_scope() as session:
+        all_problems = list(session.query(models.ExamPaper))
+        return jinja_env.get_template('exam_links.html').render(
+                all_problems=all_problems,
+                languages=ANSWER_LANG,
+                levels=exam_names)
+
+@bottle.post('/supersecreteurl/blahblah/problem_links')
+def new_problem_links():
+    language = request.forms.get('languages')
+    exam_name = request.forms.get('exam_name')
+    link = request.forms.get('link')
+    with session_scope() as session:
+        exam = models.ExamPaper()
+        exam.language = language
+        exam.link = link
+        exam.exam_name = exam_name
+        session.add(exam)
+        session.commit()
+    bottle.redirect('/supersecreteurl/blahblah/problem_links')
+
+
+@bottle.put('/exam/<uid>')
+def modify_exam(uid):
+    content = json.loads(request.body.read())
+    with session_scope() as session:
+        print(content)
+        session.query(models.ExamPaper).filter_by(uid=uid).update(
+                content)
+        session.commit()
+        return {'status': 'success'}
+
 
 def make_one_user(email): 
     with session_scope() as session:
