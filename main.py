@@ -130,6 +130,7 @@ def route(uid):
     if s == 'Start Day 2':
         bottle.redirect('/user/{}/prob/oweiur'.format(uid))
 
+
 @bottle.get('/user/<uid>/prob/<pid>')
 def get_prob_page(uid, pid):
     msg = request.query.get('msg', '')
@@ -159,12 +160,20 @@ def get_prob_page(uid, pid):
         if is_test():
             start_time = datetime.datetime.utcnow()
         else:
-            if user.start_timestamp is None:
-                start_time = datetime.datetime.utcnow()
-                session.query(models.User).filter_by(access_uuid=uid).update(
-                        {'start_timestamp': datetime.datetime.utcnow()})
+            if level == 'hard_day_1':
+                if user.start_timestamp is None:
+                    start_time = datetime.datetime.utcnow()
+                    session.query(models.User).filter_by(access_uuid=uid).update(
+                            {'start_timestamp': datetime.datetime.utcnow()})
+                else:
+                    start_time = user.start_timestamp
             else:
-                start_time = user.start_timestamp
+                if user.day2_timestamp is None:
+                    start_time = datetime.datetime.utcnow()
+                    session.query(models.User).filter_by(access_uuid=uid).update(
+                            {'day2_timestamp': datetime.datetime.utcnow()})
+                else:
+                    start_time = user.day2_timestamp
 
         statements = session.query(models.ExamPaper).filter_by(
                 is_active=True, test_name=level).all()

@@ -15,6 +15,7 @@ class User(Base):
     preferred_lang = Column(String(20))
     submissions = relationship('Submission', backref=backref('user'))
     start_timestamp = Column(DateTime)
+    day2_timestamp = Column(DateTime)
 
 
 class Submission(Base):
@@ -48,3 +49,4 @@ class ExamPaper(Base):
     language = Column(String(20))
     link = Column(Text)
     is_active = Column(Boolean)
+
