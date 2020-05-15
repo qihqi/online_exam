@@ -338,17 +338,17 @@ def grading_page():
 
 def insert_users_from_file(path):
     with open(path) as f:
-        content = list(csv.reader(f))
+        content = list(f.read().strip().split())
         with session_scope() as session:
             users = session.query(models.User).filter(
                     models.User.email.in_(content))
             existing = {u.email for u in users}
-            for e in content.items():
+            for e in content:
                 if e in existing:
                     continue
                 u = models.User()
                 u.email = e
-                access = uuid.uuid4()
+                access = uuid.uuid4().hex
                 u.access_uuid = access
                 session.add(u)
                 print('user', e, access)
@@ -356,7 +356,7 @@ def insert_users_from_file(path):
 
 
 def export_users(path):
-    with open('/home/han/Downloads/easy_exam.csv.csv') as x:
+    with open('/home/servidor/hardexam.csv') as x:
         emails = set(x.read().split())
     with open(path, 'w', newline='') as f:
         csv_writer = csv.writer(f)
