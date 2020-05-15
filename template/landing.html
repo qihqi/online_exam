@@ -183,8 +183,8 @@ buona volontà degli altri concorrenti.
           {% if enable_day2 %}
           <p><input type="submit" name="submit" value="Start Day 2" /></p>
           {% endif %}
-          {% if not enable_day1 and not_enable_day2 %}
-          Exam not started
+          {% if not enable_day1 and not enable_day2 %}
+	  <p>Exam not started</p>
           {% endif %}
 
 	  <h3><b> Clicking Start will start the exam and start the timer. Please finish day 1 before starting day 2.</b></h3>
