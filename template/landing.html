@@ -175,10 +175,19 @@ i partecipanti promettono di comportarsi secondo lo spirito della gara e nel ris
 buona volontà degli altri concorrenti.
     </p>
 
-      <form onsubmit="return checkform();" action="/user/{{uid}}/prob" method="get">
+      <form onsubmit="return checkform();" action="/user/{{uid}}/prob_router" method="get">
           <p><input id="accept" type="checkbox" name=accept_condition /> &nbsp; &nbsp; I accept these Conditions</p>
-          <p><input type="submit" value="Start" /></p>
-	  <h3><b> Clicking Start will start the exam and start the timer.</b></h3>
+          {% if enable_day1 %}
+          <p><input type="submit" name="submit" value="Start Day 1" /></p>
+          {% endif %}
+          {% if enable_day2 %}
+          <p><input type="submit" name="submit" value="Start Day 2" /></p>
+          {% endif %}
+          {% if not enable_day1 and not_enable_day2 %}
+          Exam not started
+          {% endif %}
+
+	  <h3><b> Clicking Start will start the exam and start the timer. Please finish day 1 before starting day 2.</b></h3>
       </form>
       </main>
         <script src="https://code.jquery.com/jquery-3.5.0.slim.min.js"></script>

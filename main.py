@@ -69,7 +69,7 @@ i18n = I18nManager(config.TEXT_STR)
 
 
 def get_problems(language):
-    prob_indexes = [93, 95, 106, 112, 115, 124, 129]
+    prob_indexes = [93, 95, 106, 112, 115]
     ans = []
     for i, j in zip(prob_indexes[:-1], prob_indexes[1:]):
         label = i18n.text(i, language)
@@ -114,9 +114,21 @@ def get_landing_page(uid):
         user = session.query(models.User).filter_by(access_uuid=uid).first()
         if user is None:
             return 'Access Id not found'
+        enable_day1 = session.query(models.ExamPaper).filter_by(
+                is_active=True, test_name='hard_day_1').first() is not None
+        enable_day2 = session.query(models.ExamPaper).filter_by(
+                is_active=True, test_name='hard_day_2').first() is not None
     return jinja_env.get_template('landing.html').render(
-            uid=uid)
+            uid=uid, enable_day1=enable_day1, enable_day2=enable_day2)
 
+
+@bottle.get('/user/<uid>/prob_router')
+def route(uid):
+    s = request.query.get('submit')
+    if s == 'Start Day 1':
+        bottle.redirect('/user/{}/prob/jiwls'.format(uid))
+    if s == 'Start Day 2':
+        bottle.redirect('/user/{}/prob/oweiur'.format(uid))
 
 @bottle.get('/user/<uid>/prob/<pid>')
 def get_prob_page(uid, pid):
@@ -161,9 +173,10 @@ def get_prob_page(uid, pid):
 
         print([(s.language, s.is_active) for s in statements])
         problems = get_problems(language)
-        end_time = start_time + datetime.timedelta(hours=5, minutes=30)
+        end_time = start_time + datetime.timedelta(hours=5)
         current_time = datetime.datetime.utcnow()
         budget_secs = (end_time - current_time).total_seconds()
+        start_number = 100 if level == 'hard_day_1' else 104
         return jinja_env.get_template('problems.html').render(
                 user=user, msg=msg, problems=problems,
                 lang=language,
@@ -171,6 +184,7 @@ def get_prob_page(uid, pid):
                 end_time=end_time, i18n=i18n, budget_secs=budget_secs,
                 submissions_numbers=submissions_numbers,
                 statements=statements,
+                start_number=start_number,
                 time_start_utc='{}:{}:{}'.format(
                     start_time.hour, start_time.minute, start_time.second))
 
@@ -239,11 +253,12 @@ def recv_solution(uid):
     upload = request.files.get('upload', None)
     language = request.forms.get('language')
     timestamp = datetime.datetime.utcnow()
+    level = 'jiwls' if prob_id <= 104 else 'oweiur'
     with session_scope() as session:
         prev_submission = session.query(models.Submission).filter_by(
                 user_id=user_id, prob_id=prob_id).first()
 
-        redirect_url = '/user/{}/prob?msg=success'.format(uid)
+        redirect_url = '/user/{}/prob/{}?msg=success'.format(uid, level)
         if prev_submission:
             filename = os.path.basename(prev_submission.link)
             upload.save(os.path.join(config.FILE_SAVE_DIR, filename),

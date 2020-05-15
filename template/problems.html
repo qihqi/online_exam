@@ -29,9 +29,9 @@
 
             <div class="panel panel-default">
               <div class="panel-heading">
-                  <h3 class="panel-title">Problem {{loop.index}}</h3>
+                  <h3 class="panel-title">Problem {{start_number+loop.index}}</h3>
               </div>
-              {% if loop.index in submissions_numbers %}
+              {% if (start_number + loop.index) in submissions_numbers %}
                  Answer recorded (Repeated upload will overwrite existing solution).
               {% else %}
                  No answer yet.
@@ -44,7 +44,7 @@
                   #}
                   <form onSubmit="return checkform('ans{{loop.index}}');" id="the_form" action="/upload_solution/{{user.access_uuid}}" method="post" enctype="multipart/form-data">
                       <div class="input-group">
-                         <input name="prob_id" value="{{loop.index}}" type="hidden" />
+                         <input name="prob_id" value="{{start_number+loop.index}}" type="hidden" />
                          <input name="user_id" value="{{user.uid}}" type="hidden" />
                          <p>
                              <label for="lang">Answer language:</label>
@@ -122,6 +122,10 @@
         if (fi.files.length > 0) {
             let size_b = fi.files.item(0).size;
             console.log('size is ', size_b);
+            if (!fi.files.item(0).name.endsWith('.pdf')) {
+                alert("must upload pdf");
+                return false;
+            }
             if (size_b > 5 * 1024 * 1024) {
                 alert("{{i18n.text(69, lang)}}");
                 return false;
