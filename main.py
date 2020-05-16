@@ -341,6 +341,8 @@ def all_scores():
                     return True
                 if num_scores < 2:
                     return True
+            if submission[0][0].language.lower() == 'estonian':
+                return True
             return False
 
         filtered = filter(should_keep_review, grouped.values())
