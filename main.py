@@ -311,6 +311,24 @@ def all_solutions():
         return jinja_env.get_template('submissions.html'
             ).render(submissions=submissions, scores=scores)
 
+@bottle.get('/supersecreteurl/vitafusion/scores')
+def all_solutions():
+    with session_scope() as session:
+        submissions_scores = session.query(models.Submission, models.Score).filter(
+                models.Submission.uid == models.Score.submission_id).all()
+        grouped = defaultdict(list)
+        for sub, score in submissions_scores:
+            groupped[sub.uid].append((sub, score))
+
+        def diff_score(sub_score_list):
+            scores = list(map(lambda x: x[1].score, sub_score_list))
+            return max(scores) - min(scores)
+
+        sorted_grouped = sorted(grouped.values(), key=diff_score)
+
+        return jinja_env.get_template('resolve_score.html'
+            ).render(submissions=sorted_grouped)
+
 
 @bottle.get('/supersecreteurl/gradingpage')
 def grading_page():
