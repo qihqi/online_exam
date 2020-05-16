@@ -28,6 +28,7 @@ class Submission(Base):
     language = Column(Text)
     timestamp = Column(DateTime)
     scores = relationship('Score', backref=backref('submission'))
+    resolved_score = relationship('ResolvedScore', backref=backref('submission'))
 
 
 class Score(Base):
@@ -49,4 +50,13 @@ class ExamPaper(Base):
     language = Column(String(20))
     link = Column(Text)
     is_active = Column(Boolean)
+
+
+class ResolvedScore(Base):
+
+    __tablename__ = 'resolved_scores'
+    uid = Column(Integer, ForeignKey(Submission.uid), primary_key=True)
+    grader = Column(String(50))
+    score = Column(Integer)
+    comment = Column(Text)
 

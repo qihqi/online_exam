@@ -7,6 +7,7 @@ import datetime
 import json
 import os
 import uuid
+from collections import defaultdict
 
 import jinja2
 from jinja2 import Environment, FileSystemLoader
@@ -312,20 +313,20 @@ def all_solutions():
             ).render(submissions=submissions, scores=scores)
 
 @bottle.get('/supersecreteurl/vitafusion/scores')
-def all_solutions():
+def all_scores():
     with session_scope() as session:
         submissions_scores = session.query(models.Submission, models.Score).filter(
                 models.Submission.uid == models.Score.submission_id).all()
         grouped = defaultdict(list)
         for sub, score in submissions_scores:
-            groupped[sub.uid].append((sub, score))
+            print(sub.resolved_score)
+            grouped[sub.uid].append((sub, score))
 
         def diff_score(sub_score_list):
             scores = list(map(lambda x: x[1].score, sub_score_list))
-            return max(scores) - min(scores)
+            return -(max(scores) - min(scores))
 
         sorted_grouped = sorted(grouped.values(), key=diff_score)
-
         return jinja_env.get_template('resolve_score.html'
             ).render(submissions=sorted_grouped)
 
@@ -392,6 +393,26 @@ def new_problem_links():
         session.commit()
     bottle.redirect('/supersecreteurl/blahblah/problem_links')
 
+
+@bottle.put('/save_resolve/<uid>')
+def save_result(uid):
+    data = json.loads(request.body.read())
+    uid = int(uid)
+    with session_scope() as session:
+        prev = session.query(models.ResolvedScore).filter_by(uid=uid).first()
+        if prev:
+            session.query(models.ResolvedScore).filter_by(uid=uid).update(
+                    data)
+        else:
+            new = models.ResolvedScore()
+            new.uid = uid
+            new.comment = data['comment']
+            new.grader = data['grader']
+            new.score = data['score']
+            session.add(new)
+        session.commit() 
+        return {'status': 'success'}
+            
 
 @bottle.put('/exam/<uid>')
 def modify_exam(uid):

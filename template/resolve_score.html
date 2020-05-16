@@ -7,42 +7,97 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
   </head>
 
-  <body>
+  <body class="container">
+      <h3> Your name: <input id="grader" /> </h3>
         <h2> All submissions </h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Problem #</th>
-                    <th scope="col">Language</th>
-                    <th scope="col">Link </th>
-                    <th scope="col">Grader</th>
-                    <th scope="col">Comments</th>
-                    <th scope="col">Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for sublist in submissions %}
+            {% for sublist in submissions %}
+            {% set score = sublist[0] %}
+            <h3>
+                Problem # {{ score[0].prob_id }}
+                {{ score[0].language }}
+                <a href="/{{ score[0].link }}">Solution Link</a>
+            </h3>
+            {% if score[0].resolved_score %}
+            <h3>Resolved to {{ score[0].resolved_score[0].score }} by {{score[0].resolved_score[0].grader}}</h3>
+            <b>Comments:</b> {{score[0].resolved_score[0].comment}}
+            {% endif %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Score</th>
+                        <th scope="col">Grader</th>
+                        <th scope="col">Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
                 {% for score in sublist %}
-                <tr>
-                    {% if loop.index == 0 %}
-                    <td scope="col">{{ score[0].prob_id }}</td>
-                    <td scope="col">{{ score[0].language }}</td>
-                    <td scope="col"><a href="/{{ score[0].link }}">{{ score[0].link }}</a></td>
-                    {% endif %}
-                    <td scope="col">{{score[1].grader}}</td>
-                    <td scope="col">{{score[1].comment}}</td>
-                    <td scope="col">{{score[1].score}}</td>
-                </tr>
+                    <tr>
+                        <td scope="col">{{score[1].score}}</td>
+                        <td scope="col">{{score[1].grader}}</td>
+                        <td scope="col">{{score[1].comment}}</td>
+                    </tr>
                 {% endfor %}
-                {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+            <input id="resolve_score_{{score[0].uid}}" placeholder="resolve score" />
+            <button class="resolve_button" score_id="{{score[0].uid}}" >Save final score</button>
+            <p>
+            Comments:
+            </p>
+            <p>
+            <textarea id="resolve_comment_{{score[0].uid}}" placeholder="Comments" > </textarea>
+            </p>
+            <hr/>
+            <br/>
+            <br/>
+            {% endfor %}
 
-        <script src="https://code.jquery.com/jquery-3.5.0.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
   <!-- Latest compiled and minified JavaScript -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+function save_final_score(event) {
+    console.log('adsdf');
+    let uid = parseInt($(event.target).attr('score_id'));
+    let score = parseInt($('#resolve_score_' + uid).val());
+    let comments = $('#resolve_comment_' + uid).val();
+    let grader = $('#grader').val();
+    if (Number.isNaN(score)) {
+        alert('score should be a number');
+        return;
+    }
+    if (score < 0) {
+        alert('score should be positive');
+        return;
+    }
+    if (score > 7) {
+        alert('score should be less than 7');
+        return;
+    }
+    if (grader.length == 0) {
+        alert('please write your name');
+        return;
+    }
+    $.ajax({
+        data: JSON.stringify({
+            score: score,
+            comment: comments,
+            grader: grader
+        }),
+        method: 'PUT',
+        url: '/save_resolve/' + uid,
+        success: function() {
+            alert('Saved! Saving again will overwrite');
+        }
+    });
+}
+$(document).ready(function() {
+    $('.resolve_button').on('click', save_final_score);
+
+});
+</script>
 
   </body>
 </html>
