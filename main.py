@@ -316,17 +316,35 @@ def all_solutions():
 def all_scores():
     with session_scope() as session:
         submissions_scores = session.query(models.Submission, models.Score).filter(
-                models.Submission.uid == models.Score.submission_id).all()
+                models.Submission.uid == models.Score.submission_id).filter(
+                models.Submission.prob_id < 100).all()
         grouped = defaultdict(list)
         for sub, score in submissions_scores:
-            print(sub.resolved_score)
             grouped[sub.uid].append((sub, score))
 
         def diff_score(sub_score_list):
             scores = list(map(lambda x: x[1].score, sub_score_list))
             return -(max(scores) - min(scores))
 
-        sorted_grouped = sorted(grouped.values(), key=diff_score)
+        def should_keep_review(submission):
+            # submission is list of tuple of (submission, score)
+            num_scores = len(submission)
+            scores = [s[1].score for s in submission if s[1].score != -1]
+            if not scores:  # score is empty i.e. all -1
+                return True
+            if num_scores <= 1:
+                return True
+            if max(scores) - min(scores) > 2:
+                return True
+            if max(scores) == 7: 
+                if min(scores) != 7:
+                    return True
+                if num_scores < 2:
+                    return True
+            return False
+
+        filtered = filter(should_keep_review, grouped.values())
+        sorted_grouped = sorted(filtered, key=diff_score)
         return jinja_env.get_template('resolve_score.html'
             ).render(submissions=sorted_grouped)
 
