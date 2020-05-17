@@ -1,0 +1,42 @@
+<html>
+  <head>
+       <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+  </head>
+
+  <body class="container">
+      <form method="post" action="/submission/{{submission.uid}}" >
+          <p> <input type="submit" value="Save" /> </p>
+          <p> Submission Id: {{ submission.uid }}  </p>
+          <p> Language: <input name="language" value="{{submission.language }}"/> </p>
+          <p> Prob Id: <input name="prob_id" value="{{submission.prob_id}}"/> </p>
+
+          <table class="container">
+              <tr>
+                  <td>Delete</td>
+                  <td>Score</td>
+                  <td>Comment</td>
+              </tr>
+              {% for s in submission.scores %} 
+              <tr>
+                  <td><input type="checkbox" name="remove_{{s.uid}}" value="{{s.uid}}" /></td>
+                  <td> {{ s.score }} </td>
+                  <td>{{ s.comment }}</td>
+              </tr>
+              {% endfor %}
+          </table>
+      </form>
+
+    <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+</script>
+
+  </body>
+</html>

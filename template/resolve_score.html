@@ -13,6 +13,7 @@
             {% for sublist in submissions %}
             {% set score = sublist[0] %}
             <h3>
+                <a href="/submission/{{score[0].uid}}">Edit</a>
                 Problem # {{ score[0].prob_id }}
                 {{ score[0].language }}
                 <a href="/{{ score[0].link }}">Solution Link</a>

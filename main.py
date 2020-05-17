@@ -341,14 +341,47 @@ def all_scores():
                     return True
                 if num_scores < 2:
                     return True
-            if submission[0][0].language.lower() == 'estonian':
-                return True
             return False
 
         filtered = filter(should_keep_review, grouped.values())
         sorted_grouped = sorted(filtered, key=diff_score)
         return jinja_env.get_template('resolve_score.html'
             ).render(submissions=sorted_grouped)
+
+
+@bottle.get('/submission/<uid>')
+def edit_submission(uid):
+    with session_scope() as session:
+        sub = session.query(models.Submission).filter_by(uid=uid).first()
+        if sub is None:
+            return 'Not found'
+        return jinja_env.get_template('edit_submission.html'
+                ).render(submission=sub)
+
+
+@bottle.post('/submission/<uid>')
+def save_submission(uid):
+    new_prob_id = request.forms.get('prob_id')
+    new_lang = request.forms.get('language')
+    print(request.forms.keys())
+
+    to_remove = [int(p.replace('remove_', '')) 
+                 for p in request.forms.keys()
+                 if p.startswith('remove_')]
+
+    with session_scope() as session:
+        session.query(models.Submission).filter_by(
+                uid=uid).update({
+                    'language': new_lang,
+                    'prob_id': new_prob_id
+                    })
+        session.query(models.Score).filter(
+                models.Score.uid.in_(to_remove)).delete(
+                        synchronize_session='fetch')
+        session.commit()
+        bottle.redirect('/submission/{}'.format(uid))
+
+
 
 
 @bottle.get('/supersecreteurl/gradingpage')
