@@ -4,6 +4,7 @@
 import csv
 from contextlib import contextmanager
 import datetime
+import io
 import json
 import os
 import uuid
@@ -348,6 +349,59 @@ def all_scores():
         return jinja_env.get_template('resolve_score.html'
             ).render(submissions=sorted_grouped)
 
+@bottle.get('/supersecreteurl/vitafusion/scores.csv')
+def all_scores_csv():
+    disp = request.query.get('disp')
+    with session_scope() as session:
+        user_submissions = session.query(
+                models.User.email,
+                models.Submission.uid,
+                models.Submission.prob_id, 
+                models.ResolvedScore.score).select_from(models.User).join(
+                        models.Submission).join(
+                        models.ResolvedScore, isouter=True).all()
+        submissions_scores = session.query(
+                models.Submission, models.Score).filter(
+                models.Submission.uid == models.Score.submission_id)
+        grouped = defaultdict(list)
+        for sub, score in submissions_scores:
+            grouped[sub.uid].append((sub, score))
+        def get_grade(submission):
+            # submission is list of tuple of (submission, score)
+            num_scores = len(submission)
+            scores = [s[1].score for s in submission if s[1].score != -1]
+            if not scores:  # score is empty i.e. all -1
+                return None 
+            if num_scores > 1 and len(scores) == 1:
+                return scores[0]
+            if max(scores) - min(scores) == 0:
+                return min(scores)
+            if max(scores) == 7: 
+                return None 
+            if max(scores) - min(scores) == 1:
+                return min(scores)
+            if max(scores) - min(scores) == 2:
+                return min(scores) + 1
+            return None
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['email', 'prob num', 'score'])
+        for user, sid, pid, score in user_submissions:
+            if score is not None:
+                writer.writerow([user, pid, score])
+            else:
+                all_scores = grouped.get(sid)
+                if all_scores is None:
+                    continue
+                newscore = get_grade(all_scores)
+                if newscore is not None:
+                    writer.writerow([user, pid, newscore])
+    
+        if not disp:
+            response.set_header('Content-disposition', 'attachment')
+            response.set_header('Content-type', 'application/xml')
+        return output.getvalue()
 
 @bottle.get('/submission/<uid>')
 def edit_submission(uid):
