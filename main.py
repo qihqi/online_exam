@@ -221,11 +221,12 @@ def get_prob():
                                 func.count(models.Score.uid) <= 1)
 
         c, solution = None, None
+        c_solution = sorted(c_solution, key=lambda x: x[0] or 0)
         for c_sol in c_solution:
             if c_sol[1].uid not in graded_by_this:
                 c, solution = c_sol
                 break
-        if c is None:
+        if solution is None:
             return {'status': 'not_found'}
 
         return {
@@ -233,7 +234,7 @@ def get_prob():
             'link': solution.link,
             'prob_id': solution.prob_id,
             'lang': solution.language,
-            'scores_count': c,
+            'scores_count': c or 0,
             'submission_id': solution.uid,
             'timestamp': solution.timestamp.isoformat(),
             'start_time': solution.user.start_timestamp.isoformat(),
@@ -519,7 +520,7 @@ def save_result(uid):
             session.add(new)
         session.commit() 
         return {'status': 'success'}
-            
+
 
 @bottle.put('/exam/<uid>')
 def modify_exam(uid):
