@@ -228,7 +228,9 @@ def get_prob():
                 break
         if solution is None:
             return {'status': 'not_found'}
-
+        st = (solution.user.start_timestamp if
+              solution.prob_id < 105 else
+              solution.user.day2_timestamp)
         return {
             'status': 'found',
             'link': solution.link,
@@ -237,7 +239,7 @@ def get_prob():
             'scores_count': c or 0,
             'submission_id': solution.uid,
             'timestamp': solution.timestamp.isoformat(),
-            'start_time': solution.user.start_timestamp.isoformat(),
+            'start_time': st.isoformat() if st else 'None'
         }
 
 
