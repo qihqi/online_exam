@@ -218,7 +218,7 @@ def get_prob():
                 models.Submission.language == lang
                 ).group_by(
                         models.Submission.uid).having(
-                                func.count(models.Score.uid) <= 1)
+                                func.count(models.Score.uid) < 1)
 
         c, solution = None, None
         c_solution = sorted(c_solution, key=lambda x: x[0] or 0)
