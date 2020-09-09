@@ -377,6 +377,7 @@ def all_scores_csv():
                 return None 
             if num_scores > 1 and len(scores) == 1:
                 return scores[0]
+            return min(scores)
             if max(scores) - min(scores) == 0:
                 return min(scores)
             if max(scores) == 7: 
