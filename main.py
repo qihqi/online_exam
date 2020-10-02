@@ -320,8 +320,7 @@ def all_solutions():
 def all_scores():
     with session_scope() as session:
         submissions_scores = session.query(models.Submission, models.Score).filter(
-                models.Submission.uid == models.Score.submission_id).filter(
-                models.Submission.prob_id < 100).all()
+                models.Submission.uid == models.Score.submission_id).all()
         grouped = defaultdict(list)
         for sub, score in submissions_scores:
             grouped[sub.uid].append((sub, score))
@@ -336,15 +335,15 @@ def all_scores():
             scores = [s[1].score for s in submission if s[1].score != -1]
             if not scores:  # score is empty i.e. all -1
                 return True
-            if num_scores <= 1:
-                return True
-            if max(scores) - min(scores) > 2:
-                return True
-            if max(scores) == 7: 
-                if min(scores) != 7:
-                    return True
-                if num_scores < 2:
-                    return True
+#            if num_scores <= 1:
+#                return True
+#            if max(scores) - min(scores) > 2:
+#                return True
+#            if max(scores) == 7:
+#                if min(scores) != 7:
+#                    return True
+#                if num_scores < 2:
+#                    return True
             return False
 
         filtered = filter(should_keep_review, grouped.values())
