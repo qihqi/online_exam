@@ -406,6 +406,27 @@ def all_scores_csv():
             response.set_header('Content-type', 'application/xml')
         return output.getvalue()
 
+@bottle.get('/supersecreteurl/vitafusion/scores2.csv')
+def all_scores_csv2():
+    disp = request.query.get('disp')
+    with session_scope() as session:
+        users = session.query(models.User).all()
+        submissions_scores = session.query(
+                models.Submission, models.Score).filter(
+                models.Submission.uid == models.Score.submission_id)
+        user_id_to_email = {u.uid: u.email for u in users}
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['email', 'grader', 'prob num', 'score'])
+        for sub, scores in submission_scores:
+            email = user_id_to_email[sub.user_id]
+            writer.writerow([email, scores.grader, sub.prob_id, scores.score])
+
+        if not disp:
+            response.set_header('Content-disposition', 'attachment')
+            response.set_header('Content-type', 'application/xml')
+        return output.getvalue()
+
 @bottle.get('/submission/<uid>')
 def edit_submission(uid):
     with session_scope() as session:
